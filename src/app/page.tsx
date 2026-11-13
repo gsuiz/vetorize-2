@@ -68,6 +68,10 @@ export default function Page() {
     const xCoord: number[] = points.map((point) => point[0]);
     const yCoord: number[] = points.map((point) => point[1]);
 
+    // const xCoord = [1,3,6, null, 4,8,9]
+    // const yCoord = [0,2,4, null, 1,3,0]
+
+
     const maxX: number = Math.max(...xCoord);
     const minX: number = Math.min(...xCoord);
     const maxY: number = Math.max(...yCoord);
