@@ -1,19 +1,19 @@
 import { Matrix, Vector } from "../types";
 import { isMatrix } from "./validators";
 
-export const multiplyMatrices = (a: number[][], b: number[][]): number[][] => {
-  const m = a.length;
-  const n = a[0].length;
-  const p = b[0].length;
+export const multiplyMatrices = (leftMatrix: number[][], rightMatrix: number[][]): number[][] => {
+  const rowCount = leftMatrix.length;
+  const sharedDimension = leftMatrix[0].length;
+  const columnCount = rightMatrix[0].length;
 
-  const result: number[][] = Array(m)
+  const result: number[][] = Array(rowCount)
     .fill(0)
-    .map(() => Array(p).fill(0));
+    .map(() => Array(columnCount).fill(0));
 
-  for (let i = 0; i < m; i++) {
-    for (let j = 0; j < p; j++) {
-      for (let k = 0; k < n; k++) {
-        result[i][j] += a[i][k] * b[k][j];
+  for (let i = 0; i < rowCount; i++) {
+    for (let j = 0; j < columnCount; j++) {
+      for (let k = 0; k < sharedDimension; k++) {
+        result[i][j] += leftMatrix[i][k] * rightMatrix[k][j];
       }
     }
   }
@@ -57,16 +57,16 @@ export const transformPointsAroundAnchor = (
 };
 
 
-export const somarMatrizes = (a: number[][], b: number[][]): number[][] => {
-  return a.map((linha, i) => linha.map((val, j) => val + b[i][j]));
+export const addMatrices = (leftMatrix: number[][], rightMatrix: number[][]): number[][] => {
+  return leftMatrix.map((row, rowIndex) => row.map((value, columnIndex) => value + rightMatrix[rowIndex][columnIndex]));
 };
 
 
-export const multiplicarPorEscalar = (
-  m: number[][],
-  escalar: number,
+export const multiplyMatrixByScalar = (
+  matrix: number[][],
+  scalar: number,
 ): number[][] => {
-  return m.map((linha) => linha.map((val) => val * escalar));
+  return matrix.map((row) => row.map((value) => value * scalar));
 };
 
 /**
@@ -83,21 +83,21 @@ export const calculateInverse = (matrix: Matrix): Matrix => {
   //   ),
   // );
 
-  const mtx: Matrix = matrix.map((row) => [...row]);
+  const adjugateMatrix: Matrix = matrix.map((row) => [...row]);
 
-  const aux: number = mtx[0][0];
-  mtx[0][0] = mtx[lines - 1][columns - 1];
-  mtx[columns - 1][lines - 1] = aux;
+  const firstDiagonalValue: number = adjugateMatrix[0][0];
+  adjugateMatrix[0][0] = adjugateMatrix[lines - 1][columns - 1];
+  adjugateMatrix[columns - 1][lines - 1] = firstDiagonalValue;
 
-  mtx[0][columns - 1] *= -1;
-  mtx[lines - 1][0] *= -1;
+  adjugateMatrix[0][columns - 1] *= -1;
+  adjugateMatrix[lines - 1][0] *= -1;
 
-  const det: number =
-    mtx[0][0] * mtx[lines - 1][columns - 1] -
-    mtx[0][columns - 1] * mtx[lines - 1][0];
+  const determinant: number =
+    adjugateMatrix[0][0] * adjugateMatrix[lines - 1][columns - 1] -
+    adjugateMatrix[0][columns - 1] * adjugateMatrix[lines - 1][0];
 
-  const inverseMatrix = mtx.map((line: [number, number]) =>
-    line.map((item: number) => item / det),
+  const inverseMatrix = adjugateMatrix.map((row: [number, number]) =>
+    row.map((value: number) => value / determinant),
   );
 
   return inverseMatrix as Matrix;
@@ -136,5 +136,5 @@ export const calculateAnchorPoint = (currentPoints: Matrix): Vector => {
  */
 
 export const transpose = (m: number[][]): number[][] => {
-  return m[0].map((_, j) => m.map((linha) => linha[j]));
+  return m[0].map((_, columnIndex) => m.map((row) => row[columnIndex]));
 };

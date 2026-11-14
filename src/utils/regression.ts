@@ -1,30 +1,30 @@
-import type { Matrix, Reta } from "@/types";
+import type { Matrix, LinearRegressionCoefficients } from "@/types";
 import { transpose, multiplyMatrices, calculateInverse } from "@/utils/matrix";
 
 /**
  * Mínimos quadrados pela equação normal: β = (XᵀX)⁻¹ Xᵀy
  * Retorna null se não for possível calcular (menos de 2 pontos ou todos com o mesmo x).
  */
-export const calcularRegressao = (points: Matrix): Reta | null => {
+export const calculateLinearRegression = (points: Matrix): LinearRegressionCoefficients | null => {
   if (points.length < 2) {
     return null;
   }
 
-  const X = points.map(([x]) => [1, x]);
-  const y = points.map(([, y]) => [y]);
+  const designMatrix = points.map(([x]) => [1, x]);
+  const observedValues = points.map(([, y]) => [y]);
 
-  const Xt = transpose(X);
-  const XtX = multiplyMatrices(Xt, X);
+  const transposedDesignMatrix = transpose(designMatrix);
+  const normalMatrix = multiplyMatrices(transposedDesignMatrix, designMatrix);
 
-  const det = XtX[0][0] * XtX[1][1] - XtX[0][1] * XtX[1][0];
-  if (det === 0) {
+  const determinant = normalMatrix[0][0] * normalMatrix[1][1] - normalMatrix[0][1] * normalMatrix[1][0];
+  if (determinant === 0) {
     return null;
   }
 
-  const beta = multiplyMatrices(
-    multiplyMatrices(calculateInverse(XtX as Matrix), Xt),
-    y,
+  const coefficientMatrix = multiplyMatrices(
+    multiplyMatrices(calculateInverse(normalMatrix as Matrix), transposedDesignMatrix),
+    observedValues,
   );
 
-  return { b: beta[0][0], a: beta[1][0] };
+  return { intercept: coefficientMatrix[0][0], slope: coefficientMatrix[1][0] };
 };

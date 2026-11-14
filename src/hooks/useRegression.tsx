@@ -2,23 +2,23 @@
 
 import { useState, useMemo } from "react";
 import { usePoints } from "@/context/PointsContext";
-import { calcularRegressao } from "@/utils/regression";
+import { calculateLinearRegression } from "@/utils/regression";
 
-interface Variaveis {
-  dependente: string;
-  independente: string;
+interface RegressionVariableLabels {
+  dependent: string;
+  independent: string;
 }
 
-export function useRegressao() {
+export function useRegression() {
   const { points } = usePoints();
 
-  const [variaveis, setVariaveis] = useState<Variaveis>({
-    dependente: "",
-    independente: "",
+  const [variableLabels, setVariableLabels] = useState<RegressionVariableLabels>({
+    dependent: "",
+    independent: "",
   });
 
   // derivado dos pontos: recalcula só quando points muda
-  const reta = useMemo(() => calcularRegressao(points), [points]);
+  const regressionCoefficients = useMemo(() => calculateLinearRegression(points), [points]);
 
-  return { reta, variaveis, setVariaveis }
-} 
+  return { regressionCoefficients, variableLabels, setVariableLabels }
+}

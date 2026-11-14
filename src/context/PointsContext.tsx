@@ -8,18 +8,18 @@ interface PointsProviderProps {
   children: ReactNode;
 }
 
-interface UndoItem {
+interface TransformationUndoEntry {
   inverse: Matrix;
   anchor: Vector;
 }
 
 interface PointsContextType {
   points: Matrix;
-  inversesStack: UndoItem[];
+  transformationUndoStack: TransformationUndoEntry[];
   addPoint: (newPoint: Vector, setErr: (param: string) => void) => void;
   removePoints: (pointIndices: number[]) => void;
   setPoints: (newPoints: Matrix) => void;
-  setInversesStack: (callback: (prev: UndoItem[]) => UndoItem[]) => void;
+  setTransformationUndoStack: (callback: (prev: TransformationUndoEntry[]) => TransformationUndoEntry[]) => void;
 }
 
 const PointsContext = createContext<PointsContextType | null>(null);
@@ -30,7 +30,7 @@ const includesPoint = (currentPoints: Matrix, newPoint: Vector): boolean => {
   });
 };
 
-const organizePoints = (newPoints: Matrix): Matrix => {
+const sortPointsByCentroidAngle = (newPoints: Matrix): Matrix => {
   const xCoord: number[] = newPoints.map((item) => item[0]);
   const yCoord: number[] = newPoints.map((item) => item[1]);
 
@@ -45,12 +45,12 @@ const organizePoints = (newPoints: Matrix): Matrix => {
 
     const angle = Math.atan2(deltaY, deltaX);
 
-    return { vetor: item, angle };
+    return { point: item, angle };
   });
 
   const orderedByAngle = pointsWithAngle.sort((a, b) => a.angle - b.angle);
 
-  return orderedByAngle.map((item) => item.vetor);
+  return orderedByAngle.map((item) => item.point);
 };
 
 export function usePoints() {
@@ -65,14 +65,14 @@ export function usePoints() {
 
 export default function PointsProvider({ children }: PointsProviderProps) {
   const [points, setPoints] = useState<Matrix>([]);
-  const [inversesStack, setInversesStack] = useState<UndoItem[]>([]);
+  const [transformationUndoStack, setTransformationUndoStack] = useState<TransformationUndoEntry[]>([]);
 
   const addPoint = (newPoint: Vector, setErr: (param: string) => void) => {
     if (!includesPoint(points, newPoint)) {
       let newPoints: Matrix = [...points, newPoint];
 
       if (newPoints.length >= 3) {
-        newPoints = organizePoints(newPoints);
+        newPoints = sortPointsByCentroidAngle(newPoints);
       }
 
       setPoints(newPoints);
@@ -91,11 +91,11 @@ export default function PointsProvider({ children }: PointsProviderProps) {
     <PointsContext.Provider
       value={{
         points,
-        inversesStack,
+        transformationUndoStack,
         addPoint,
         removePoints,
         setPoints,
-        setInversesStack,
+        setTransformationUndoStack,
       }}
     >
       {children}

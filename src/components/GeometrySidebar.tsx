@@ -1,31 +1,31 @@
 "use client";
 
-import PontoInput from "./PontoInput";
-import PontoList from "./PontoList";
+import PointInputForm from "./PointInputForm";
+import PointList from "./PointList";
 import type { JSX, ChangeEvent } from "react";
 import type { Mode } from "@/types";
 
-interface PontoManagerProps {
+interface GeometrySidebarProps {
   activeTitle: string;
   activeComponent: JSX.Element;
   selectedMode: Mode;
   handleSelectChange: (e: ChangeEvent<HTMLSelectElement>) => void;
 }
 
-export default function PontoManager({
+export default function GeometrySidebar({
   activeTitle,
   activeComponent,
   selectedMode,
   handleSelectChange,
-}: PontoManagerProps) {
-  const campo =
+}: GeometrySidebarProps) {
+  const selectClassName =
     "w-full font-normal h-10 px-3 text-center bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring mb-10 cursor-pointer";
 
   return (
     <aside className="h-screen w-80 bg-background border-r border-border flex flex-col p-6 shadow-lg z-10 shrink-0 transition-colors duration-200">
       <select
         id="axis"
-        className={campo}
+        className={selectClassName}
         value={selectedMode}
         onChange={handleSelectChange}
       >
@@ -39,9 +39,9 @@ export default function PontoManager({
           <h2 className="text-lg font-bold text-foreground">{activeTitle}</h2>
         </div>
         {activeComponent}
-        <PontoInput />
+        <PointInputForm />
 
-        <PontoList />
+        <PointList />
       </div>
     </aside>
   );

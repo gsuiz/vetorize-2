@@ -3,31 +3,31 @@
 import { useState } from "react";
 import { usePoints } from "../context/PointsContext";
 
-export default function PontoList() {
+export default function PointList() {
   const { points, removePoints } = usePoints()
 
   const [isSelecting, setIsSelecting] = useState(false);
-  const [selected, setSelected] = useState<number[]>([]);
+  const [selectedPointIndices, setSelectedPointIndices] = useState<number[]>([]);
 
   if (points.length === 0) return null;
 
   const toggleSelection = (index: number) => {
-    if (selected.includes(index)) {
-      setSelected(selected.filter((i) => i !== index));
+    if (selectedPointIndices.includes(index)) {
+      setSelectedPointIndices(selectedPointIndices.filter((i) => i !== index));
     } else {
-      setSelected([...selected, index]);
+      setSelectedPointIndices([...selectedPointIndices, index]);
     }
   };
 
   const handleDelete = () => {
-    removePoints(selected)
+    removePoints(selectedPointIndices)
     setIsSelecting(false);
-    setSelected([]);
+    setSelectedPointIndices([]);
   };
 
   const handleCancel = () => {
     setIsSelecting(false);
-    setSelected([]);
+    setSelectedPointIndices([]);
   };
 
   return (
@@ -53,37 +53,37 @@ export default function PontoList() {
             </button>
             <button 
               onClick={handleDelete} 
-              disabled={selected.length === 0}
+              disabled={selectedPointIndices.length === 0}
               className="text-xs font-bold text-destructive hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-opacity"
             >
-              Excluir ({selected.length})
+              Excluir ({selectedPointIndices.length})
             </button>
           </div>
         )}
       </div>
       
     
-      {points.map((p, index) => (
+      {points.map((point, index) => (
         <div 
           key={index} 
           onClick={() => isSelecting && toggleSelection(index)}
           className={`flex gap-4 items-center p-2 rounded-md border border-border bg-card shadow-sm transition-all ${
             isSelecting ? "cursor-pointer hover:border-primary" : ""
-          } ${selected.includes(index) ? "ring-1 ring-primary" : ""}`}
+          } ${selectedPointIndices.includes(index) ? "ring-1 ring-primary" : ""}`}
         >
           
           {isSelecting && (
             <input 
               type="checkbox" 
-              checked={selected.includes(index)}
+              checked={selectedPointIndices.includes(index)}
               readOnly
               className="w-4 h-4 cursor-pointer accent-primary"
             />
           )}
 
           <span className="text-sm font-medium text-card-foreground">Ponto {index + 1}:</span>
-          <span className="font-mono text-sm text-muted-foreground">x: {Number(p[0].toFixed(2))}</span>
-          <span className="font-mono text-sm text-muted-foreground">y: {Number(p[1].toFixed(2))}</span>
+          <span className="font-mono text-sm text-muted-foreground">x: {Number(point[0].toFixed(2))}</span>
+          <span className="font-mono text-sm text-muted-foreground">y: {Number(point[1].toFixed(2))}</span>
         </div>
       ))}
     </div>

@@ -9,9 +9,9 @@ export interface Transformation {
   anchor: [x: number, y: number] | null;
 };
 
-export interface Reta {
-  a: number;
-  b: number;
+export interface LinearRegressionCoefficients {
+  slope: number;
+  intercept: number;
 }
 
 export type Mode = "transformation" | "triangle" | "regression";

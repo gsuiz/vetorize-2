@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, ChangeEvent, SubmitEvent } from "react";
-import { useRegressao } from "@/hooks/useRegression";
+import { useRegression } from "@/hooks/useRegression";
 
-const campo =
+const inputClassName =
   "w-full font-normal h-10 px-3 text-center bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring";
 
-export default function FuncaoVariaveisInput() {
-  const { reta, variaveis, setVariaveis } = useRegressao();
+export default function RegressionSettingsForm() {
+  const { regressionCoefficients, variableLabels, setVariableLabels } = useRegression();
 
   const [form, setForm] = useState({
-    dependente: variaveis.dependente,
-    independente: variaveis.independente,
+    dependent: variableLabels.dependent,
+    independent: variableLabels.independent,
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -21,14 +21,14 @@ export default function FuncaoVariaveisInput() {
 
   const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setVariaveis({
-      dependente: form.dependente.trim(),
-      independente: form.independente.trim(),
+    setVariableLabels({
+      dependent: form.dependent.trim(),
+      independent: form.independent.trim(),
     });
   };
 
-  const nomeDep = variaveis.dependente || "f(x)";
-  const nomeIndep = variaveis.independente || "x";
+  const dependentVariableLabel = variableLabels.dependent || "f(x)";
+  const independentVariableLabel = variableLabels.independent || "x";
 
   return (
     <form
@@ -39,10 +39,10 @@ export default function FuncaoVariaveisInput() {
         Variável dependente:
         <input
           type="text"
-          id="dependente"
-          value={form.dependente}
+          id="dependent"
+          value={form.dependent}
           placeholder="f(x)"
-          className={campo}
+          className={inputClassName}
           onChange={handleChange}
         />
       </label>
@@ -50,18 +50,18 @@ export default function FuncaoVariaveisInput() {
         Variável independente:
         <input
           type="text"
-          id="independente"
-          value={form.independente}
+          id="independent"
+          value={form.independent}
           placeholder="x"
-          className={campo}
+          className={inputClassName}
           onChange={handleChange}
         />
       </label>
 
-      {reta && (
+      {regressionCoefficients && (
         <p className="font-mono text-sm text-muted-foreground">
-          {nomeDep} = {Number(reta.a.toFixed(4))}·{nomeIndep}{" "}
-          {reta.b < 0 ? "-" : "+"} {Math.abs(Number(reta.b.toFixed(4)))}
+          {dependentVariableLabel} = {Number(regressionCoefficients.slope.toFixed(4))}·{independentVariableLabel}{" "}
+          {regressionCoefficients.intercept < 0 ? "-" : "+"} {Math.abs(Number(regressionCoefficients.intercept.toFixed(4)))}
         </p>
       )}
 

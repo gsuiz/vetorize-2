@@ -4,21 +4,21 @@ import { useMemo } from "react";
 import type { Data, Layout } from "plotly.js";
 import type { Vector } from "@/types";
 import { usePoints } from "@/context/PointsContext";
-import { useRegressao } from "@/hooks/useRegression";
+import { useRegression } from "@/hooks/useRegression";
 import { BASE_LAYOUT, BASE_CONFIG } from "@/config/plot";
 import Plot from "@/components/Plot";
 import { calculateDataConfig } from "@/config/plot";
 
-export default function RegressaoChart() {
+export default function RegressionChart() {
   const { points } = usePoints();
-  const { reta, variaveis } = useRegressao();
+  const { regressionCoefficients, variableLabels } = useRegression();
 
   const data: Data[] = useMemo(() => {
     const xCoord = points.map((point: Vector) => point[0]);
 
     const traces: Data[] = [calculateDataConfig(points)];
 
-    if (reta && points.length >= 2) {
+    if (regressionCoefficients && points.length >= 2) {
       const minX = Math.min(...xCoord);
       const maxX = Math.max(...xCoord);
       const PADDING = 1.5;
@@ -26,7 +26,7 @@ export default function RegressaoChart() {
 
       traces.push({
         x: lineX,
-        y: lineX.map((x) => reta.a * x + reta.b),
+        y: lineX.map((x) => regressionCoefficients.slope * x + regressionCoefficients.intercept),
         type: "scatter",
         mode: "lines",
         name: "Regressão",
@@ -35,7 +35,7 @@ export default function RegressaoChart() {
     }
 
     return traces;
-  }, [points, reta]);
+  }, [points, regressionCoefficients]);
 
   const layout: Partial<Layout> = useMemo(() => {
     if (points.length === 0) {
@@ -44,12 +44,12 @@ export default function RegressaoChart() {
         showlegend: false,
         xaxis: {
           ...BASE_LAYOUT.xaxis,
-          title: { text: variaveis.independente || "x" },
+          title: { text: variableLabels.independent || "x" },
           range: [-5, 5],
         },
         yaxis: {
           ...BASE_LAYOUT.yaxis,
-          title: { text: variaveis.dependente || "y" },
+          title: { text: variableLabels.dependent || "y" },
           range: [-5, 5],
         },
       };
@@ -70,16 +70,16 @@ export default function RegressaoChart() {
       showlegend: false,
       xaxis: {
         ...BASE_LAYOUT.xaxis,
-        title: { text: variaveis.independente || "x" },
+        title: { text: variableLabels.independent || "x" },
         range: [minX - PADDING, maxX + PADDING],
       },
       yaxis: {
         ...BASE_LAYOUT.yaxis,
-        title: { text: variaveis.dependente || "y" },
+        title: { text: variableLabels.dependent || "y" },
         range: [minY - PADDING, maxY + PADDING],
       },
     };
-  }, [points, variaveis]);
+  }, [points, variableLabels]);
 
   return (
     <Plot

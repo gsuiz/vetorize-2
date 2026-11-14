@@ -2,7 +2,7 @@ import { usePoints } from "@/context/PointsContext";
 import type { Transformation, Matrix, Vector } from "@/types";
 import { calculateInverse, transformPointsAroundAnchor, calculateAnchorPoint } from "@/utils/matrix";
 
-interface UndoItem {
+interface TransformationUndoEntry {
   inverse: Matrix;
   anchor: Vector;
 }
@@ -21,7 +21,7 @@ export default function useTransformation() {
     [0, -1],
   ];
 
-  const { points, inversesStack, setPoints, setInversesStack } = usePoints();
+  const { points, transformationUndoStack, setPoints, setTransformationUndoStack } = usePoints();
 
   const applyTransformation = (transformation: Transformation) => {
     if (points.length === 0) {
@@ -29,51 +29,51 @@ export default function useTransformation() {
     }
 
     const transformationMatrices: Matrix[] = [];
-    let transMtx: Matrix;
+    let transformationMatrix: Matrix;
 
     if (transformation.scale) {
       const { sx, sy } = transformation.scale;
 
-      transMtx = [
+      transformationMatrix = [
         [sx, 0],
         [0, sy],
       ];
 
-      transformationMatrices.push(transMtx);
+      transformationMatrices.push(transformationMatrix);
     }
 
     if (transformation.rotation) {
-      const rad = transformation.rotation * (Math.PI / 180);
+      const rotationRadians = transformation.rotation * (Math.PI / 180);
 
-      transMtx = [
-        [Math.cos(rad), Math.sin(rad)],
-        [-Math.sin(rad), Math.cos(rad)],
+      transformationMatrix = [
+        [Math.cos(rotationRadians), Math.sin(rotationRadians)],
+        [-Math.sin(rotationRadians), Math.cos(rotationRadians)],
       ];
 
-      transformationMatrices.push(transMtx);
+      transformationMatrices.push(transformationMatrix);
     }
 
     if (transformation.reflection) {
-      let transMtx: Matrix;
+      let reflectionMatrix: Matrix;
 
       switch (transformation.reflection) {
         case "x":
-          transMtx = REFLECTION_MATRIX_X;
+          reflectionMatrix = REFLECTION_MATRIX_X;
           break;
         case "y":
-          transMtx = REFLECTION_MATRIX_Y;
+          reflectionMatrix = REFLECTION_MATRIX_Y;
           break;
         default:
-          transMtx = REFLECTION_MATRIX_ORIGIN;
+          reflectionMatrix = REFLECTION_MATRIX_ORIGIN;
       }
 
-      transformationMatrices.push(transMtx);
+      transformationMatrices.push(reflectionMatrix);
     }
 
     const effectiveAnchor: Vector =
       transformation.anchor ?? calculateAnchorPoint(points);
 
-    setInversesStack((prev) => [
+    setTransformationUndoStack((prev) => [
       ...prev,
       ...transformationMatrices.map((matrix) => ({
         inverse: calculateInverse(matrix),
@@ -91,8 +91,8 @@ export default function useTransformation() {
   };
 
   const undoTransformation = () => {
-    const { inverse: lastInverseMatrix, anchor }: UndoItem =
-      inversesStack.at(-1)!;
+    const { inverse: lastInverseMatrix, anchor }: TransformationUndoEntry =
+      transformationUndoStack.at(-1)!;
 
     const newPoints = transformPointsAroundAnchor(
       points,
@@ -100,7 +100,7 @@ export default function useTransformation() {
       anchor,
     );
 
-    setInversesStack((prev) => prev.slice(0, -1));
+    setTransformationUndoStack((prev) => prev.slice(0, -1));
     setPoints(newPoints);
   };
 

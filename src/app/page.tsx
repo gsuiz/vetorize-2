@@ -1,10 +1,10 @@
 "use client";
 
-import PontoManager from "../components/PontoManager";
-import TransChart from "../components/charts/TransChart";
-import RegressionComponent from "@/components/RegressionComponent";
+import GeometrySidebar from "../components/GeometrySidebar";
+import TransformationChart from "../components/charts/TransformationChart";
+import RegressionSettingsForm from "@/components/RegressionSettingsForm";
 import RegressionChart from "@/components/charts/RegressionChart";
-import PontoTrans from "@/components/PontoTrans";
+import TransformationForm from "@/components/TransformationForm";
 import type { Mode, ModeTitle } from "@/types";
 import { ChangeEvent, JSX, useState } from "react";
 
@@ -21,12 +21,12 @@ export default function Page() {
   const modeConfig: ModeMap = {
     transformation: {
       title: "Transformações",
-      component: <PontoTrans></PontoTrans>,
-      chart: <TransChart></TransChart>,
+      component: <TransformationForm></TransformationForm>,
+      chart: <TransformationChart></TransformationChart>,
     },
     regression: {
       title: "Regressão linear",
-      component: <RegressionComponent></RegressionComponent>,
+      component: <RegressionSettingsForm></RegressionSettingsForm>,
       chart: <RegressionChart></RegressionChart>,
     },
     triangle: {
@@ -46,7 +46,7 @@ export default function Page() {
 
   return (
     <div className="h-screen flex w-full">
-      <PontoManager
+      <GeometrySidebar
         activeComponent={activeComponent}
         activeTitle={activeTitle}
         selectedMode={selectedMode}

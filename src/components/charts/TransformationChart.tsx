@@ -16,7 +16,7 @@ interface FigureState {
   config?: Partial<Config>;
 }
 
-const TransChart = () => {
+const TransformationChart = () => {
   const { points } = usePoints();
 
   const [figure, setFigure] = useState<FigureState>({
@@ -79,4 +79,4 @@ const TransChart = () => {
   );
 };
 
-export default TransChart;
+export default TransformationChart;

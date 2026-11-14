@@ -5,11 +5,11 @@ import { usePoints } from "@/context/PointsContext";
 import useTransformation from "@/hooks/useTransformations";
 import type { Transformation } from "@/types";
 
-const campo =
+const inputClassName =
   "w-full font-normal h-10 px-3 text-center bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring";
 
-export default function PontoTrans() {
-  const { points, inversesStack } = usePoints();
+export default function TransformationForm() {
+  const { points, transformationUndoStack } = usePoints();
   const { applyTransformation, undoTransformation } = useTransformation()
 
   const [form, setForm] = useState({
@@ -63,7 +63,7 @@ export default function PontoTrans() {
     });
   };
 
-  const allowUndo = inversesStack.length > 0;
+  const allowUndo = transformationUndoStack.length > 0;
 
   const nothingSelected =
     (!form.rotation && !form.scale && !form.reflection) || points.length === 0;
@@ -91,7 +91,7 @@ export default function PontoTrans() {
           value={form.angle}
           onChange={handleChange}
           placeholder="Ângulo (graus)"
-          className={campo}
+          className={inputClassName}
           required={true}
         />
       )}
@@ -115,7 +115,7 @@ export default function PontoTrans() {
             value={form.sx}
             onChange={handleChange}
             placeholder="Sx"
-            className={campo}
+            className={inputClassName}
             required={true}
           />
           <input
@@ -125,7 +125,7 @@ export default function PontoTrans() {
             value={form.sy}
             onChange={handleChange}
             placeholder="Sy"
-            className={campo}
+            className={inputClassName}
             required={true}
           />
         </div>
@@ -147,28 +147,28 @@ export default function PontoTrans() {
           id="axis"
           value={form.axis}
           onChange={handleChange}
-          className={campo}
+          className={inputClassName}
         >
           <option value="x">Eixo X</option>
           <option value="y">Eixo Y</option>
-          <option value="origem">Origem</option>
+          <option value="origin">Origem</option>
         </select>
       )}
       <label className="flex gap-5 font-semibold items-center">
-        Ancoragem:
+        Âncora:
         <div className="flex gap-2">
           <input
             type="number"
             id="anchorX"
             placeholder="x"
-            className={campo}
+            className={inputClassName}
             onChange={handleChange}
           />
           <input
             type="number"
             id="anchorY"
             placeholder="y"
-            className={campo}
+            className={inputClassName}
             onChange={handleChange}
           />
         </div>
