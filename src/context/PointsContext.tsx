@@ -1,21 +1,8 @@
 "use client";
 
 import { createContext, ReactNode, useState, useContext } from "react";
-import type { Matrix, Vector, Transformation } from "../types";
-import { calculateInverse, transformPointsAroundAnchor } from "../utils/matrix";
-
-export const REFLECTION_MATRIX_X: Matrix = [
-  [1, 0],
-  [0, -1],
-];
-export const REFLECTION_MATRIX_Y: Matrix = [
-  [-1, 0],
-  [0, 1],
-];
-export const REFLECTION_MATRIX_ORIGIN: Matrix = [
-  [-1, 0],
-  [0, -1],
-];
+import type { Matrix, Vector } from "../types";
+import { sumPoints } from "../utils/matrix";
 
 interface PointsProviderProps {
   children: ReactNode;
@@ -31,25 +18,11 @@ interface PointsContextType {
   inversesStack: UndoItem[];
   addPoint: (newPoint: Vector, setErr: (param: string) => void) => void;
   removePoints: (pointIndices: number[]) => void;
-  applyTransformation: (transformation: Transformation) => void;
-  undoTransformation: () => void;
+  setPoints: (newPoints: Matrix) => void;
+  setInversesStack: (callback: (prev: UndoItem[]) => UndoItem[]) => void;
 }
 
 const PointsContext = createContext<PointsContextType | null>(null);
-
-const sumPoints = (param: number[]) => {
-  return param.reduce((acc, item) => (acc += item), 0);
-};
-
-const calculateAnchorPoint = (currentPoints: Matrix): Vector => {
-  const xCoord: number[] = currentPoints.map((item) => item[0]);
-  const yCoord: number[] = currentPoints.map((item) => item[1]);
-
-  const xCenter = sumPoints(xCoord) / xCoord.length;
-  const yCenter = sumPoints(yCoord) / yCoord.length;
-
-  return [xCenter, yCenter];
-};
 
 const includesPoint = (currentPoints: Matrix, newPoint: Vector): boolean => {
   return currentPoints.some((p) => {
@@ -114,87 +87,6 @@ export default function PointsProvider({ children }: PointsProviderProps) {
     );
   };
 
-  const applyTransformation = (transformation: Transformation) => {
-    if (points.length === 0) {
-      return;
-    }
-
-    const transformationMatrices: Matrix[] = [];
-    let transMtx: Matrix;
-
-    if (transformation.scale) {
-      const { sx, sy } = transformation.scale;
-
-      transMtx = [
-        [sx, 0],
-        [0, sy],
-      ];
-
-      transformationMatrices.push(transMtx);
-    }
-
-    if (transformation.rotation) {
-      const rad = transformation.rotation * (Math.PI / 180);
-
-      transMtx = [
-        [Math.cos(rad), Math.sin(rad)],
-        [-Math.sin(rad), Math.cos(rad)],
-      ];
-
-      transformationMatrices.push(transMtx);
-    }
-
-    if (transformation.reflection) {
-      let transMtx: Matrix;
-
-      switch (transformation.reflection) {
-        case "x":
-          transMtx = REFLECTION_MATRIX_X;
-          break;
-        case "y":
-          transMtx = REFLECTION_MATRIX_Y;
-          break;
-        default:
-          transMtx = REFLECTION_MATRIX_ORIGIN;
-      }
-
-      transformationMatrices.push(transMtx);
-    }
-
-    const effectiveAnchor: Vector =
-      transformation.anchor ?? calculateAnchorPoint(points);
-
-    setInversesStack((prev) => [
-      ...prev,
-      ...transformationMatrices.map((matrix) => ({
-        inverse: calculateInverse(matrix),
-        anchor: effectiveAnchor,
-      })),
-    ]);
-
-    const newPoints = transformPointsAroundAnchor(
-      points,
-      transformationMatrices,
-      effectiveAnchor,
-    );
-
-    setPoints(newPoints);
-  };
-
-  const undoTransformation = () => {
-    const { inverse: lastInverseMatrix, anchor }: UndoItem =
-      inversesStack.at(-1)!;
-
-    const newPoints = transformPointsAroundAnchor(
-      points,
-      lastInverseMatrix,
-      anchor,
-    );
-
-    setInversesStack((prev) => prev.slice(0, -1));
-    setPoints(newPoints);
-  };
-
   return (
     <PointsContext.Provider
       value={{
@@ -202,8 +94,8 @@ export default function PointsProvider({ children }: PointsProviderProps) {
         inversesStack,
         addPoint,
         removePoints,
-        applyTransformation,
-        undoTransformation,
+        setPoints,
+        setInversesStack,
       }}
     >
       {children}

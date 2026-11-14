@@ -1,129 +1,61 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { usePoints } from "../context/PointsContext";
-import dynamic from "next/dynamic";
 import PontoManager from "../components/PontoManager";
-import type { Data, Layout, Config } from "plotly.js";
-import { FigureCallback } from "react-plotly.js";
+import TransChart from "../components/charts/TransChart";
+import RegressionComponent from "@/components/RegressionComponent";
+import RegressionChart from "@/components/charts/RegressionChart";
+import PontoTrans from "@/components/PontoTrans";
+import type { Mode, ModeTitle } from "@/types";
+import { ChangeEvent, JSX, useState } from "react";
 
-const Plot = dynamic(() => import("react-plotly.js"), {
-  ssr: false,
-  loading: () => <div>Carregando gráfico...</div>,
-});
-
-interface FigureState {
-  data: Data[];
-  layout: Partial<Layout>;
-  config?: Partial<Config>;
-}
+type ModeMap = Record<
+  Mode,
+  { title: ModeTitle; component: JSX.Element; chart: JSX.Element }
+>;
 
 export default function Page() {
-  const { points } = usePoints();
+  const initSelectedMode = "transformation";
 
-  const [figure, setFigure] = useState<FigureState>({
-    data: [
-      {
-        x: points.map((item) => item[0]),
-        y: points.map((item) => item[1]),
-        type: "scatter",
-        mode: "markers",
-        marker: { color: "red", size: 12 },
-        line: { width: 5 },
-        fill: "toself",
-      },
-    ],
-    layout: {
-      autosize: true,
-      dragmode: "pan",
-      paper_bgcolor: "transparent",
-      plot_bgcolor: "transparent",
+  const [selectedMode, setSelectedMode] = useState<Mode>(initSelectedMode);
 
-      xaxis: {
-        gridcolor: "#222222",
-        zerolinecolor: "#444444",
-        tickfont: { color: "#a1a1aa" },
-        tickformat: ".2~f",
-        hoverformat: ".2~f",
-      },
-      yaxis: {
-        gridcolor: "#222222",
-        zerolinecolor: "#444444",
-        tickfont: { color: "#a1a1aa" },
-        tickformat: ".2~f",
-        hoverformat: ".2~f",
-        scaleanchor: "x",
-        scaleratio: 1,
-      },
-      margin: { l: 50, r: 50, t: 60, b: 50 },
+  const modeConfig: ModeMap = {
+    transformation: {
+      title: "Transformações",
+      component: <PontoTrans></PontoTrans>,
+      chart: <TransChart></TransChart>,
     },
-    config: {
-      responsive: true,
-      displayModeBar: false,
-      scrollZoom: true,
+    regression: {
+      title: "Regressão linear",
+      component: <RegressionComponent></RegressionComponent>,
+      chart: <RegressionChart></RegressionChart>,
     },
-  });
+    triangle: {
+      title: "Área do Triângulo",
+      component: <h1>Triângulo</h1>,
+      chart: <h1>chart</h1>,
+    },
+  };
 
-  useEffect(() => {
-    const xCoord: number[] = points.map((point) => point[0]);
-    const yCoord: number[] = points.map((point) => point[1]);
+  const activeTitle: string = modeConfig[selectedMode].title;
+  const activeComponent: JSX.Element = modeConfig[selectedMode].component;
+  const activeChart: JSX.Element = modeConfig[selectedMode].chart;
 
-    // const xCoord = [1,3,6, null, 4,8,9]
-    // const yCoord = [0,2,4, null, 1,3,0]
-
-
-    const maxX: number = Math.max(...xCoord);
-    const minX: number = Math.min(...xCoord);
-    const maxY: number = Math.max(...yCoord);
-    const minY: number = Math.min(...yCoord);
-
-    const PADDING: number = 1.5;
-
-    setFigure((prev: FigureState) => ({
-      ...prev,
-      data: [
-        {
-          ...prev.data[0],
-          x: xCoord,
-          y: yCoord,
-        },
-      ],
-      layout: {
-        ...prev.layout,
-        xaxis: {
-          range: [minX - PADDING, maxX + PADDING],
-          ...prev.layout.xaxis,
-        },
-        yaxis: {
-          range: [minY - PADDING, maxY + PADDING],
-          ...prev.layout.yaxis,
-        },
-      },
-    }));
-  }, [points]);
-
-  const updateFigure = (figure: FigureState) => {
-    setFigure((prev) => ({
-      ...prev,
-      ...figure,
-    }));
+  const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMode(e.target.value as Mode);
   };
 
   return (
     <div className="h-screen flex w-full">
-      <PontoManager />
+      <PontoManager
+        activeComponent={activeComponent}
+        activeTitle={activeTitle}
+        selectedMode={selectedMode}
+        handleSelectChange={handleSelectChange}
+      />
 
       <main className="flex-1 p-8 w-full h-full bg-background flex items-center justify-center">
         <div className="w-full h-full max-w-6xl max-h-[800px]">
-          <Plot
-            data={figure.data}
-            layout={figure.layout}
-            config={figure.config}
-            onInitialized={updateFigure as FigureCallback}
-            onUpdate={updateFigure as FigureCallback}
-            useResizeHandler={true}
-            style={{ width: "100%", height: "100%" }}
-          />
+          {activeChart}
         </div>
       </main>
     </div>

@@ -1,7 +1,6 @@
 import { Matrix, Vector } from "../types";
 import { isMatrix } from "./validators";
 
-
 export const multiplyMatrices = (a: number[][], b: number[][]): number[][] => {
   const m = a.length;
   const n = a[0].length;
@@ -78,7 +77,6 @@ export const calculateInverse = (matrix: Matrix): Matrix => {
   const lines: number = matrix.length;
   const columns: number = matrix[0].length;
 
-  // gera a matriz de identidade
   // const identity: number[][] = [...Array(lines)].map((_, lineIndex) =>
   //   [...Array(columns)].map((_, columnIndex) =>
   //     lineIndex === columnIndex ? 1 : 0,
@@ -103,4 +101,40 @@ export const calculateInverse = (matrix: Matrix): Matrix => {
   );
 
   return inverseMatrix as Matrix;
+};
+
+/**
+ * 
+ * @param param 
+ * 
+ */
+
+export const sumPoints = (param: number[]) => {
+  return param.reduce((acc, item) => (acc += item), 0);
+};
+
+/**
+ * 
+ * @param currentPoints 
+ * 
+ */
+
+export const calculateAnchorPoint = (currentPoints: Matrix): Vector => {
+  const xCoord: number[] = currentPoints.map((item) => item[0]);
+  const yCoord: number[] = currentPoints.map((item) => item[1]);
+
+  const xCenter = sumPoints(xCoord) / xCoord.length;
+  const yCenter = sumPoints(yCoord) / yCoord.length;
+
+  return [xCenter, yCenter];
+};
+
+/**
+ * 
+ * @param m 
+ * 
+ */
+
+export const transpose = (m: number[][]): number[][] => {
+  return m[0].map((_, j) => m.map((linha) => linha[j]));
 };
