@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, ReactNode, useState, useContext } from "react";
+import { useModeContext } from "./ModeContext";
 import type { Matrix, Vector } from "../types";
 import { sumPoints } from "../utils/matrix";
 
@@ -64,6 +65,8 @@ export function usePoints() {
 }
 
 export default function PointsProvider({ children }: PointsProviderProps) {
+  const { mode } = useModeContext()
+
   const [points, setPoints] = useState<Matrix>([]);
   const [transformationUndoStack, setTransformationUndoStack] = useState<TransformationUndoEntry[]>([]);
 
@@ -71,7 +74,7 @@ export default function PointsProvider({ children }: PointsProviderProps) {
     if (!includesPoint(points, newPoint)) {
       let newPoints: Matrix = [...points, newPoint];
 
-      if (newPoints.length >= 3) {
+      if (newPoints.length >= 3 && mode === "transformation") {
         newPoints = sortPointsByCentroidAngle(newPoints);
       }
 

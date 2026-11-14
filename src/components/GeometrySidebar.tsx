@@ -3,34 +3,37 @@
 import PointInputForm from "./PointInputForm";
 import PointList from "./PointList";
 import type { JSX, ChangeEvent } from "react";
+import { useModeContext } from "@/context/ModeContext";
 import type { Mode } from "@/types";
 
 interface GeometrySidebarProps {
   activeTitle: string;
   activeComponent: JSX.Element;
-  selectedMode: Mode;
-  handleSelectChange: (e: ChangeEvent<HTMLSelectElement>) => void;
 }
 
 export default function GeometrySidebar({
   activeTitle,
   activeComponent,
-  selectedMode,
-  handleSelectChange,
 }: GeometrySidebarProps) {
   const selectClassName =
     "w-full font-normal h-10 px-3 text-center bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring mb-10 cursor-pointer";
+
+  const { mode, setSelectedMode } = useModeContext();
+
+  const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMode(e.target.value as Mode);
+  };
 
   return (
     <aside className="h-screen w-80 bg-background border-r border-border flex flex-col p-6 shadow-lg z-10 shrink-0 transition-colors duration-200">
       <select
         id="axis"
         className={selectClassName}
-        value={selectedMode}
+        value={mode}
         onChange={handleSelectChange}
       >
         <option value="transformation">Transformações</option>
-        <option value="triangle">Área do Triângulo</option>
+        <option value="triangles">Área do Triângulo</option>
         <option value="regression">Regressão linear</option>
       </select>
 

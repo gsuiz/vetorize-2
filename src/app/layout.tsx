@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import PointsProvider from "../context/PointsContext";
+import ModeProvider from "@/context/ModeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,13 +22,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="pt-BR"  
+      lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <PointsProvider>
-          {children}
-        </PointsProvider>
+        <ModeProvider>
+          <PointsProvider>{children}</PointsProvider>
+        </ModeProvider>
       </body>
     </html>
   );

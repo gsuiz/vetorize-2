@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { Data, Layout, Config } from "plotly.js";
+import type { FigureState } from "@/types";
 import { usePoints } from "../../context/PointsContext";
 import { FigureCallback } from "react-plotly.js";
 import Plot from "@/components/Plot"
@@ -9,12 +9,6 @@ import {
   BASE_LAYOUT,
   calculateDataConfig,
 } from "@/config/plot";
-
-interface FigureState {
-  data: Data[];
-  layout: Partial<Layout>;
-  config?: Partial<Config>;
-}
 
 const TransformationChart = () => {
   const { points } = usePoints();

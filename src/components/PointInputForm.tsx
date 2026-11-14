@@ -17,7 +17,7 @@ export default function PointInputForm() {
   const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (coordinateInputs.x.trim() === "" || coordinateInputs.y.trim() === "") return;
+    if ( coordinateInputs.x.trim() === "" || coordinateInputs.y.trim() === "" ) return;
 
     addPoint(
       [
