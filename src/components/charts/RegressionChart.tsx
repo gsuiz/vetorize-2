@@ -8,6 +8,7 @@ import { useRegression } from "@/hooks/useRegression";
 import { BASE_LAYOUT, BASE_CONFIG } from "@/config/plot";
 import Plot from "@/components/Plot";
 import { calculateDataConfig } from "@/config/plot";
+import { getCoordinatesAndEndpoints } from "@/utils/matrix";
 
 export default function RegressionChart() {
   const { points } = usePoints();
@@ -26,7 +27,10 @@ export default function RegressionChart() {
 
       traces.push({
         x: lineX,
-        y: lineX.map((x) => regressionCoefficients.slope * x + regressionCoefficients.intercept),
+        y: lineX.map(
+          (x) =>
+            regressionCoefficients.slope * x + regressionCoefficients.intercept,
+        ),
         type: "scatter",
         mode: "lines",
         name: "Regressão",
@@ -55,13 +59,7 @@ export default function RegressionChart() {
       };
     }
 
-    const xCoord = points.map((point: Vector) => point[0]);
-    const yCoord = points.map((point: Vector) => point[1]);
-
-    const maxX = Math.max(...xCoord);
-    const minX = Math.min(...xCoord);
-    const maxY = Math.max(...yCoord);
-    const minY = Math.min(...yCoord);
+    const { maxX, minX, maxY, minY } = getCoordinatesAndEndpoints(points);
 
     const PADDING = 1.5;
 

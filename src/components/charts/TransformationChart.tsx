@@ -2,19 +2,16 @@ import { useState, useEffect } from "react";
 import type { FigureState } from "@/types";
 import { usePoints } from "../../context/PointsContext";
 import { FigureCallback } from "react-plotly.js";
-import Plot from "@/components/Plot"
+import Plot from "@/components/Plot";
+import { getCoordinatesAndEndpoints } from "@/utils/matrix";
 
-import {
-  BASE_CONFIG,
-  BASE_LAYOUT,
-  calculateDataConfig,
-} from "@/config/plot";
+import { BASE_CONFIG, BASE_LAYOUT, calculateDataConfig } from "@/config/plot";
 
 const TransformationChart = () => {
   const { points } = usePoints();
 
   const [figure, setFigure] = useState<FigureState>({
-    data: [{...calculateDataConfig(points), fill:"toself"}],
+    data: [{ ...calculateDataConfig(points), fill: "toself" }],
     layout: BASE_LAYOUT,
     config: BASE_CONFIG,
   });
@@ -27,13 +24,8 @@ const TransformationChart = () => {
   };
 
   useEffect(() => {
-    const xCoord: number[] = points.map((point) => point[0]);
-    const yCoord: number[] = points.map((point) => point[1]);
-
-    const maxX: number = Math.max(...xCoord);
-    const minX: number = Math.min(...xCoord);
-    const maxY: number = Math.max(...yCoord);
-    const minY: number = Math.min(...yCoord);
+    const { xCoord, yCoord, maxX, minX, maxY, minY } =
+      getCoordinatesAndEndpoints(points);
 
     const PADDING: number = 1.5;
 

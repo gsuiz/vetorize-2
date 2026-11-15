@@ -1,7 +1,10 @@
 import { Matrix, Vector } from "../types";
 import { isMatrix } from "./validators";
 
-export const multiplyMatrices = (leftMatrix: number[][], rightMatrix: number[][]): number[][] => {
+export const multiplyMatrices = (
+  leftMatrix: number[][],
+  rightMatrix: number[][],
+): number[][] => {
   const rowCount = leftMatrix.length;
   const sharedDimension = leftMatrix[0].length;
   const columnCount = rightMatrix[0].length;
@@ -33,8 +36,6 @@ export const transformPointsAroundAnchor = (
   transformationMatrices: Matrix | Matrix[],
   anchorPoint: Vector,
 ): Matrix => {
-
-  
   let newPoints = currentPoints.map(([x, y]) => [
     x - anchorPoint[0],
     y - anchorPoint[1],
@@ -56,11 +57,14 @@ export const transformPointsAroundAnchor = (
   return newPoints;
 };
 
-
-export const addMatrices = (leftMatrix: number[][], rightMatrix: number[][]): number[][] => {
-  return leftMatrix.map((row, rowIndex) => row.map((value, columnIndex) => value + rightMatrix[rowIndex][columnIndex]));
+export const addMatrices = (
+  leftMatrix: number[][],
+  rightMatrix: number[][],
+): number[][] => {
+  return leftMatrix.map((row, rowIndex) =>
+    row.map((value, columnIndex) => value + rightMatrix[rowIndex][columnIndex]),
+  );
 };
-
 
 export const multiplyMatrixByScalar = (
   matrix: number[][],
@@ -104,9 +108,9 @@ export const calculateInverse = (matrix: Matrix): Matrix => {
 };
 
 /**
- * 
- * @param param 
- * 
+ *
+ * @param param
+ *
  */
 
 export const sumPoints = (param: number[]) => {
@@ -114,9 +118,9 @@ export const sumPoints = (param: number[]) => {
 };
 
 /**
- * 
- * @param currentPoints 
- * 
+ *
+ * @param currentPoints
+ *
  */
 
 export const calculateAnchorPoint = (currentPoints: Matrix): Vector => {
@@ -130,11 +134,26 @@ export const calculateAnchorPoint = (currentPoints: Matrix): Vector => {
 };
 
 /**
- * 
- * @param m 
- * 
+ *
+ * @param m
+ *
  */
 
 export const transpose = (m: number[][]): number[][] => {
   return m[0].map((_, columnIndex) => m.map((row) => row[columnIndex]));
+};
+
+export const generateNullArray = (length: number): (number | null)[] =>
+  [...Array(length)].map((_) => null);
+
+export const getCoordinatesAndEndpoints = (points: Matrix) => {
+  const xCoord: number[] = points.map((point) => point[0]);
+  const yCoord: number[] = points.map((point) => point[1]);
+
+  const maxX: number = Math.max(...xCoord);
+  const minX: number = Math.min(...xCoord);
+  const maxY: number = Math.max(...yCoord);
+  const minY: number = Math.min(...yCoord);
+
+  return { xCoord, yCoord, maxX, maxY, minX, minY }
 };
