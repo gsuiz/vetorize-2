@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
-import type { FigureState } from "@/types";
+import type { FigureState, Matrix, Vector } from "@/types";
 import { usePoints } from "../../context/PointsContext";
-import { FigureCallback } from "react-plotly.js";
+import type { FigureCallback } from "react-plotly.js";
+import type { Annotation } from "plotly.js";
 import Plot from "@/components/Plot";
-import { generateNullArray, getCoordinatesAndEndpoints } from "@/utils/matrix";
+import {
+  calculateAnchorPoint,
+  generateNullArray,
+  getCoordinatesAndEndpoints,
+  calculateTriangleArea
+} from "@/utils/matrix";
 
 import { BASE_CONFIG, BASE_LAYOUT, calculateDataConfig } from "@/config/plot";
 
@@ -43,6 +49,26 @@ const TrianglesChart = () => {
     return [newXCoord, newYCoord];
   }
 
+  function getTrianglesInSeparations(
+    pointsWithSep: (number | null)[],
+  ): number[][] {
+    let baseIndex: number = 0;
+
+    const trianglesCoordSegments = pointsWithSep.reduce(
+      (acc: number[][], item: number | null, index: number) => {
+        if (item === null) {
+          acc.push(pointsWithSep.slice(baseIndex, index) as number[]);
+          baseIndex = index + 1;
+        }
+
+        return acc;
+      },
+      [],
+    );
+
+    return trianglesCoordSegments;
+  }
+
   useEffect(() => {
     // verificação se foi adicionado 3 pontos.
 
@@ -56,6 +82,52 @@ const TrianglesChart = () => {
       yCoord,
     );
 
+    // divide os pontos pelos nulls
+
+    const xCoordSegmentsTriangles =
+      getTrianglesInSeparations(xCoordWithSeparation);
+    const yCoordSegmentsTriangles =
+      getTrianglesInSeparations(yCoordWithSeparation);
+
+    // talvez seja melhor iterar nos 3 pontos acima.
+
+    const trianglesPoints: Matrix[] = xCoordSegmentsTriangles.map( // [ [ [ 3, 7 ], [ 1, 4 ], [ 0, 6 ] ], [ [ 6, 0 ], [ 8, 1 ], [ 10, 5 ] ] ]
+      (segPoints: number[], segIndex) =>
+        segPoints.map((point: number, pointIndex) => [
+          point,
+          yCoordSegmentsTriangles[segIndex][pointIndex],
+        ]),
+    );
+
+    const annotations: Annotation[] = [];
+  
+    let totalArea: number = 0
+
+    trianglesPoints.forEach((triangle:Matrix) => {   
+      const triangleArea: number = calculateTriangleArea(triangle)
+      const anchorPoint: Vector = calculateAnchorPoint(triangle)
+
+      totalArea+= triangleArea
+
+      const triangleAnnotation: Annotation = {
+        text: `<b>${triangleArea}</b>`,
+        font: {
+          family: "JetBrains Mono",
+          color:"#ffffff",
+          size:16,
+        },
+        showarrow:false,
+        xref: "x",
+        yref: "y",
+        x: anchorPoint[0],
+        y: anchorPoint[1]
+      }
+
+      annotations.push(triangleAnnotation)
+    })
+
+    console.log(totalArea)
+
     setFigure((prev: FigureState) => {
       return {
         ...prev,
@@ -68,6 +140,7 @@ const TrianglesChart = () => {
         ],
         layout: {
           ...prev.layout,
+          annotations: annotations,
           xaxis: {
             range: [minX - PADDING, maxX + PADDING],
             ...prev.layout.xaxis,

@@ -143,8 +143,20 @@ export const transpose = (m: number[][]): number[][] => {
   return m[0].map((_, columnIndex) => m.map((row) => row[columnIndex]));
 };
 
+/**
+ *
+ * @param length
+ *
+ */
+
 export const generateNullArray = (length: number): (number | null)[] =>
   [...Array(length)].map((_) => null);
+
+/**
+ *
+ * @param points
+ *
+ */
 
 export const getCoordinatesAndEndpoints = (points: Matrix) => {
   const xCoord: number[] = points.map((point) => point[0]);
@@ -155,5 +167,53 @@ export const getCoordinatesAndEndpoints = (points: Matrix) => {
   const maxY: number = Math.max(...yCoord);
   const minY: number = Math.min(...yCoord);
 
-  return { xCoord, yCoord, maxX, maxY, minX, minY }
+  return { xCoord, yCoord, maxX, maxY, minX, minY };
+};
+
+/**
+ *
+ * @param param
+ *
+ */
+
+export const flatten2DMatrix = (param: number[][]): number[] => {
+  return param.reduce((acc, item) => [...acc, ...item], []);
+};
+
+export const calculateDeterminant3x3 = (matrix: number[][]) => {
+  if (matrix.length !== 3 || matrix.some((row) => row.length !== 3)) {
+    throw new Error("A matriz não possui o formato 3x3.");
+  }
+
+  const expandedMatrix: number[][] = matrix.map((row) => [
+    ...row,
+    row[0],
+    row[1],
+  ]);
+
+  let principalSum: number = 0;
+  let secondarySum: number = 0;
+
+  for (let i = 0; i <= 2; i++) {
+    let mainMultiplication: number = 1;
+    let secondatyMultiplication: number = 1;
+
+    for (let j = 0; j <= 2; j++) {
+      mainMultiplication *= expandedMatrix[j][j + i];
+      secondatyMultiplication *= expandedMatrix[j][i + 2 - j];
+    }
+
+    principalSum += mainMultiplication;
+    secondarySum += secondatyMultiplication;
+  }
+
+  return principalSum - secondarySum;
+};
+
+export const calculateTriangleArea = (trianglePoints: Matrix): number => {
+  const triangleMatrix = trianglePoints.map((point: Vector) => [...point, 1]);
+
+  const determinant: number = calculateDeterminant3x3(triangleMatrix);
+
+  return Math.abs(determinant) / 2;
 };
