@@ -7,6 +7,7 @@ import TransformationChart from "@/components/charts/TransformationChart";
 import RegressionSettingsForm from "@/components/RegressionSettingsForm";
 import RegressionChart from "@/components/charts/RegressionChart";
 import TrianglesChart from "@/components/charts/TrianglesChart";
+import TriangleSummary from "@/components/TrianglesSummary";
 
 const initSelectedMode: Mode = "transformation";
 
@@ -23,6 +24,7 @@ interface ModeContextType {
 const ModeContext = createContext<ModeContextType | null>(null);
 
 const ModeProvider = ({ children }: ModeProviderType) => {
+  const [trianglesTotalArea, setTrianglesTotalArea] = useState<number>(0);
   const [selectedMode, setSelectedMode] = useState<Mode>(initSelectedMode);
 
   const modeConfig: ModeMap = {
@@ -38,8 +40,8 @@ const ModeProvider = ({ children }: ModeProviderType) => {
     },
     triangles: {
       title: "Área do Triângulo",
-      component: <h1>Área Total 0</h1>,
-      chart: <TrianglesChart></TrianglesChart>,
+      component: <TriangleSummary trianglesTotalArea={trianglesTotalArea} />,
+      chart: <TrianglesChart changeTrianglesTotalArea={setTrianglesTotalArea} />,
     },
   };
 
