@@ -17,6 +17,12 @@ export interface LinearRegressionCoefficients {
   intercept: number;
 }
 
+export interface QuadraticRegressionCoefficients {
+  curvature: number
+  slope: number;
+  intercept: number;
+}
+
 export type Mode = "transformation" | "triangles" | "regression";
 export type ModeTitle = "Transformações" | "Área do Triângulo" | "Regressão linear";
 
