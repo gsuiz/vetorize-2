@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { usePoints } from "@/context/PointsContext";
-import { calculateLinearRegression } from "@/utils/regression";
+import { calculateLinearRegression, calculateExpoRegression, calculateQuadraticRegression } from "@/utils/regression";
+import type { RegressionType } from "@/types";
 
 interface RegressionVariableLabels {
   dependent: string;
@@ -12,13 +13,30 @@ interface RegressionVariableLabels {
 export function useRegression() {
   const { points } = usePoints();
 
-  const [variableLabels, setVariableLabels] = useState<RegressionVariableLabels>({
-    dependent: "",
-    independent: "",
-  });
+  const [variableLabels, setVariableLabels] =
+    useState<RegressionVariableLabels>({
+      dependent: "",
+      independent: "",
+    });
+
+  const [chosenRegression, setChosenRegression] =
+    useState<RegressionType>("linear");
 
   // derivado dos pontos: recalcula só quando points muda
-  const regressionCoefficients = useMemo(() => calculateLinearRegression(points), [points]);
+  const regressionCoefficients = useMemo(
+    () => {
+      switch (chosenRegression){
+        case "linear":
+          return calculateLinearRegression(points)
+        case "quadratic":
+          return calculateQuadraticRegression(points)
+        case "exponential":
+          return calculateExpoRegression(points)
+        default: 
+          return calculateLinearRegression(points)
+      }
+    },[points, chosenRegression]
+  );
 
-  return { regressionCoefficients, variableLabels, setVariableLabels }
+  return { regressionCoefficients, chosenRegression, variableLabels, setVariableLabels, setChosenRegression };
 }

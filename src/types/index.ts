@@ -41,3 +41,5 @@ export interface FigureState {
   layout: Partial<Layout>;
   config?: Partial<Config>;
 }
+
+export type RegressionType = "linear" | "exponential" | "quadratic";

@@ -31,10 +31,11 @@ export default function GeometrySidebar({
         className={selectClassName}
         value={mode}
         onChange={handleSelectChange}
+        defaultValue={"transformation"}
       >
         <option value="transformation">Transformações</option>
         <option value="triangles">Área do Triângulo</option>
-        <option value="regression">Regressão linear</option>
+        <option value="regression">Regressão</option>
       </select>
 
       <div className="flex-1 flex flex-col overflow-y-auto">

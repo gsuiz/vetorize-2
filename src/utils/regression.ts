@@ -110,8 +110,6 @@ export const calculateQuadraticRegression = (points: Matrix): QuadraticRegressio
     [sumX2, sumX3, sumX2Y],
   ]);
 
-
-  
   const intercept = determinantC /determinant
   const slope = determinantB/determinant
   const curvature = determinantA/determinant
