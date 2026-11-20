@@ -16,6 +16,8 @@ export interface RegressionCoefficients {
   slope: number;
   intercept: number;
 }
+
+
 export interface LinearRegressionCoefficients extends RegressionCoefficients {}
 
 

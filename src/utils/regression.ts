@@ -1,4 +1,4 @@
-import type { Matrix, LinearRegressionCoefficients, QuadraticRegressionCoefficients } from "@/types";
+import type { Matrix, LinearRegressionCoefficients, QuadraticRegressionCoefficients, ExponencialRegressionCoeficientes } from "@/types";
 import { calculateDeterminant3x3 } from "./matrix";
 
 export const calculateLinearRegression = (points: Matrix): LinearRegressionCoefficients | null => {
@@ -29,7 +29,9 @@ export const calculateLinearRegression = (points: Matrix): LinearRegressionCoeff
   const intercept = (sumY - slope * sumX) / n; 
   return { intercept, slope };
 };
-export const calculateExpoRegression = (points: Matrix): LinearRegressionCoefficients | null => {
+
+
+export const calculateExpoRegression = (points: Matrix): ExponencialRegressionCoeficientes | null => {
   const n = points.length; 
 
   if (n < 2) {
@@ -37,15 +39,15 @@ export const calculateExpoRegression = (points: Matrix): LinearRegressionCoeffic
   }
 
   let sumX = 0;  
-  let sumY = 0; 
+  let sumLogY = 0; 
   let sumXX = 0; 
-  let sumXY = 0; 
+  let sumXLogY = 0; 
 
   for (const [x, y] of points) {
     sumX += x;
-    sumY += y;
+    sumLogY += Math.log(y);
     sumXX += x * x;
-    sumXY += x * y;
+    sumXLogY += x * Math.log(y);
   }
 
   const determinant = n * sumXX - sumX * sumX;
@@ -53,9 +55,9 @@ export const calculateExpoRegression = (points: Matrix): LinearRegressionCoeffic
     return null;
   }
 
-  const slope = (n * sumXY - sumX * sumY) / determinant; 
-  const intercept = (sumY - slope * sumX) / n; 
-  return null
+  const slope = (n * sumXLogY - sumX * sumLogY) / determinant; 
+  const intercept =  Math.exp((sumLogY - slope * sumX) / n); 
+  return {intercept, slope}
 }
 
 export const calculateQuadraticRegression = (points: Matrix): QuadraticRegressionCoefficients | null => {
