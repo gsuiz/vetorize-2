@@ -12,15 +12,17 @@ export interface Transformation {
   anchor: [x: number, y: number] | null;
 };
 
-export interface LinearRegressionCoefficients {
+export interface RegressionCoefficients {
   slope: number;
   intercept: number;
 }
+export interface LinearRegressionCoefficients extends RegressionCoefficients {}
 
-export interface QuadraticRegressionCoefficients {
-  curvature: number
-  slope: number;
-  intercept: number;
+
+export interface ExponencialRegressionCoeficientes extends RegressionCoefficients {};
+
+export interface QuadraticRegressionCoefficients extends RegressionCoefficients {
+  curvature: number;
 }
 
 export type Mode = "transformation" | "triangles" | "regression";
