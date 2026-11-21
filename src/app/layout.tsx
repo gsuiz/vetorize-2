@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import PointsProvider from "../context/PointsContext";
 import ModeProvider from "@/context/ModeContext";
+import RegressionProvider from "@/context/RegressionContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +28,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <ModeProvider>
-          <PointsProvider>{children}</PointsProvider>
+          <PointsProvider>
+            <RegressionProvider>{children}</RegressionProvider>
+          </PointsProvider>
         </ModeProvider>
       </body>
     </html>

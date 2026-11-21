@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import type { Data, Layout } from "plotly.js";
 import type { Vector } from "@/types";
 import { usePoints } from "@/context/PointsContext";
-import { useRegression } from "@/hooks/useRegression";
+import { useRegressionContext } from "@/context/RegressionContext";
 import { BASE_LAYOUT, BASE_CONFIG } from "@/config/plot";
 import Plot from "@/components/Plot";
 import { calculateDataConfig } from "@/config/plot";
@@ -13,7 +13,7 @@ import { calculateRegressionImage } from "@/utils/regression";
 
 export default function RegressionChart() {
   const { points } = usePoints();
-  const { regressionCoefficients, variableLabels, chosenRegression } = useRegression();
+  const { regressionCoefficients, variableLabels, chosenRegression } = useRegressionContext();
 
   const data: Data[] = useMemo(() => {
     const xCoord = points.map((point: Vector) => point[0]);
@@ -24,7 +24,12 @@ export default function RegressionChart() {
       const minX = Math.min(...xCoord);
       const maxX = Math.max(...xCoord);
       const PADDING = 1.5;
-      const lineX = [minX - PADDING, maxX + PADDING];
+      const startX = minX - PADDING
+      const endX = maxX + PADDING
+      const STEP = 0.06
+      const SAMPLES = (endX - startX) / STEP
+      
+      const lineX = Array.from({ length: SAMPLES }, (_, i) => startX + (STEP * i))
 
       traces.push({
         x: lineX,
@@ -40,7 +45,7 @@ export default function RegressionChart() {
     }
 
     return traces;
-  }, [points, regressionCoefficients]);
+  }, [points, regressionCoefficients, chosenRegression]);
 
   const layout: Partial<Layout> = useMemo(() => {
     if (points.length === 0) {

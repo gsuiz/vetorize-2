@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, ChangeEvent, SubmitEvent } from "react";
-import { useRegression } from "@/hooks/useRegression";
 import type { RegressionType } from "@/types";
 import { buildEquation } from "@/utils/regression";
+import { useRegressionContext } from "@/context/RegressionContext";
 
 const inputClassName =
   "w-full font-normal h-10 px-3 text-center bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring";
@@ -15,7 +15,7 @@ export default function RegressionSettingsForm() {
     variableLabels,
     setVariableLabels,
     setChosenRegression,
-  } = useRegression();
+  } = useRegressionContext();
 
   const [form, setForm] = useState({
     dependent: variableLabels.dependent,
@@ -74,7 +74,6 @@ export default function RegressionSettingsForm() {
         className={`${inputClassName} mb-5 cursor-pointer`}
         value={chosenRegression}
         onChange={handleSelectChange}
-        defaultValue={"linear"}
       >
         <option value="linear">Regressão Linear</option>
         <option value="quadratic">Regressão Quadrática</option>
