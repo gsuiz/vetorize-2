@@ -3,6 +3,7 @@
 import { useState, ChangeEvent, SubmitEvent } from "react";
 import { useRegression } from "@/hooks/useRegression";
 import type { RegressionType } from "@/types";
+import { buildEquation } from "@/utils/regression";
 
 const inputClassName =
   "w-full font-normal h-10 px-3 text-center bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring";
@@ -27,10 +28,10 @@ export default function RegressionSettingsForm() {
   };
 
   const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    setChosenRegression(e.target.value as RegressionType)
-  }
+    setChosenRegression(e.target.value as RegressionType);
+  };
 
   const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,9 +40,6 @@ export default function RegressionSettingsForm() {
       independent: form.independent.trim(),
     });
   };
-
-  const dependentVariableLabel = variableLabels.dependent || "f(x)";
-  const independentVariableLabel = variableLabels.independent || "x";
 
   return (
     <form
@@ -83,15 +81,14 @@ export default function RegressionSettingsForm() {
         <option value="exponential">Regressão Exponencial</option>
       </select>
 
-      {regressionCoefficients && (
+      {regressionCoefficients ? (
         <p className="font-mono text-sm text-muted-foreground">
-          {dependentVariableLabel} ={" "}
-          {Number(regressionCoefficients.slope.toFixed(4))}·
-          {independentVariableLabel}{" "}
-          {regressionCoefficients.intercept < 0 ? "-" : "+"}{" "}
-          {Math.abs(Number(regressionCoefficients.intercept.toFixed(4)))}
+          {buildEquation(
+            chosenRegression,
+            regressionCoefficients,
+          )}
         </p>
-      )}
+      ) : null}
 
       <button className="h-10 px-4 bg-secondary text-secondary-foreground font-medium rounded-md hover:opacity-90 cursor-pointer">
         Aplicar

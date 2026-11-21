@@ -15,17 +15,9 @@ export interface Transformation {
 export interface RegressionCoefficients {
   slope: number;
   intercept: number;
+  curvature: number | null
 }
 
-
-export interface LinearRegressionCoefficients extends RegressionCoefficients {}
-
-
-export interface ExponencialRegressionCoeficientes extends RegressionCoefficients {};
-
-export interface QuadraticRegressionCoefficients extends RegressionCoefficients {
-  curvature: number;
-}
 
 export type Mode = "transformation" | "triangles" | "regression";
 export type ModeTitle = "Transformações" | "Área do Triângulo" | "Regressão linear";

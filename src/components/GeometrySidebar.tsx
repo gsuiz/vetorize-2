@@ -31,7 +31,6 @@ export default function GeometrySidebar({
         className={selectClassName}
         value={mode}
         onChange={handleSelectChange}
-        defaultValue={"transformation"}
       >
         <option value="transformation">Transformações</option>
         <option value="triangles">Área do Triângulo</option>

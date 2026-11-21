@@ -9,10 +9,11 @@ import { BASE_LAYOUT, BASE_CONFIG } from "@/config/plot";
 import Plot from "@/components/Plot";
 import { calculateDataConfig } from "@/config/plot";
 import { getCoordinatesAndEndpoints } from "@/utils/matrix";
+import { calculateRegressionImage } from "@/utils/regression"; 
 
 export default function RegressionChart() {
   const { points } = usePoints();
-  const { regressionCoefficients, variableLabels } = useRegression();
+  const { regressionCoefficients, variableLabels, chosenRegression } = useRegression();
 
   const data: Data[] = useMemo(() => {
     const xCoord = points.map((point: Vector) => point[0]);
@@ -29,7 +30,7 @@ export default function RegressionChart() {
         x: lineX,
         y: lineX.map(
           (x) =>
-            regressionCoefficients.slope * x + regressionCoefficients.intercept,
+            calculateRegressionImage(chosenRegression, regressionCoefficients, x),
         ),
         type: "scatter",
         mode: "lines",
