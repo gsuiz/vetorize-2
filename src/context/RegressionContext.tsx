@@ -1,11 +1,19 @@
 "use client";
-import { createContext, ReactNode, useContext, useState, useMemo } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useState,
+  useMemo,
+  useEffect,
+} from "react";
 import { usePoints } from "@/context/PointsContext";
 import {
   calculateLinearRegression,
   calculateExpoRegression,
   calculateQuadraticRegression,
 } from "@/utils/regression";
+import { isRegressionType } from "@/utils/validators";
 import type { RegressionType, RegressionCoefficients } from "@/types";
 
 interface RegressionProviderType {
@@ -21,11 +29,23 @@ interface RegressionContextType {
   regressionCoefficients: RegressionCoefficients | null;
   chosenRegression: RegressionType;
   variableLabels: RegressionVariableLabels;
-  setVariableLabels: (param:RegressionVariableLabels) => void;
+  setVariableLabels: (param: RegressionVariableLabels) => void;
   setChosenRegression: (param: RegressionType) => void;
 }
 
 const RegressionContext = createContext<RegressionContextType | null>(null);
+
+const getStoredRegressionType = (): RegressionType => {
+  try {
+    const storedRegressionType = localStorage.getItem("regressionType");
+
+    return isRegressionType(storedRegressionType)
+      ? storedRegressionType
+      : "linear";
+  } catch (err) {
+    throw `Error during retrieval of the stored regression type: ${err}`;
+  }
+};
 
 export default function RegressionProvider({
   children,
@@ -38,8 +58,14 @@ export default function RegressionProvider({
       independent: "",
     });
 
+  const savedRegressionType = getStoredRegressionType();
+
   const [chosenRegression, setChosenRegression] =
-    useState<RegressionType>("linear");
+    useState<RegressionType>(savedRegressionType);
+
+  useEffect(() => {
+    localStorage.setItem("regressionType", chosenRegression);
+  }, [chosenRegression]);
 
   const regressionCoefficients: RegressionCoefficients | null = useMemo(() => {
     switch (chosenRegression) {
@@ -69,12 +95,12 @@ export default function RegressionProvider({
   );
 }
 
-export function useRegressionContext(){
-    const context = useContext(RegressionContext)
+export function useRegressionContext() {
+  const context = useContext(RegressionContext);
 
-    if(!context){
-        throw new Error("ERROR IN CONTEXT")
-    }
+  if (!context) {
+    throw new Error("ERROR IN CONTEXT");
+  }
 
-    return context
+  return context;
 }

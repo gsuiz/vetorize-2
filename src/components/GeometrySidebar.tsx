@@ -11,17 +11,19 @@ interface GeometrySidebarProps {
   activeComponent: JSX.Element;
 }
 
+const selectClassName =
+  "w-full font-normal h-10 px-3 text-center bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring mb-10 cursor-pointer";
+
 export default function GeometrySidebar({
   activeTitle,
   activeComponent,
 }: GeometrySidebarProps) {
-  const selectClassName =
-    "w-full font-normal h-10 px-3 text-center bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring mb-10 cursor-pointer";
-
   const { mode, setSelectedMode } = useModeContext();
 
   const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setSelectedMode(e.target.value as Mode);
+    const targetValue = e.target.value as Mode
+    
+    setSelectedMode(targetValue);
   };
 
   return (

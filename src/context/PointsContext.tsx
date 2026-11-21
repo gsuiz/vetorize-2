@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, ReactNode, useState, useContext } from "react";
+import { createContext, ReactNode, useState, useContext, useEffect } from "react";
 import { useModeContext } from "./ModeContext";
 import type { Matrix, Vector } from "../types";
+import { isMatrix } from "@/utils/validators";
 import { sumPoints } from "../utils/matrix";
 
 interface PointsProviderProps {
@@ -24,6 +25,22 @@ interface PointsContextType {
 }
 
 const PointsContext = createContext<PointsContextType | null>(null);
+
+const getStoredPoints = (): Matrix => {
+  try{
+    const storedPoints = localStorage.getItem("points")
+
+    if(!storedPoints){
+      return []
+    }
+
+    const matrixStoredPoints:number[][] = JSON.parse(storedPoints) 
+    
+    return isMatrix(matrixStoredPoints) ? matrixStoredPoints : []
+  } catch(err) {
+    throw new Error(`Error during retrieval of stored points: ${err}`)
+  }
+}
 
 const includesPoint = (currentPoints: Matrix, newPoint: Vector): boolean => {
   return currentPoints.some((p) => {
@@ -67,8 +84,14 @@ export function usePoints() {
 export default function PointsProvider({ children }: PointsProviderProps) {
   const { mode } = useModeContext()
 
-  const [points, setPoints] = useState<Matrix>([]);
+  const savedPoints = getStoredPoints()
+
+  const [points, setPoints] = useState<Matrix>(savedPoints);
   const [transformationUndoStack, setTransformationUndoStack] = useState<TransformationUndoEntry[]>([]);
+
+  useEffect(() => {
+    localStorage.setItem("points", JSON.stringify(points))
+  }, [points])
 
   const addPoint = (newPoint: Vector, setErr: (param: string) => void) => {
     if (!includesPoint(points, newPoint)) {

@@ -1,15 +1,20 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
 import type { Mode, ModeMap } from "@/types";
+import { isMode } from "@/utils/validators";
 import TransformationForm from "@/components/TransformationForm";
 import TransformationChart from "@/components/charts/TransformationChart";
 import RegressionSettingsForm from "@/components/RegressionSettingsForm";
 import RegressionChart from "@/components/charts/RegressionChart";
 import TrianglesChart from "@/components/charts/TrianglesChart";
 import TriangleSummary from "@/components/TrianglesSummary";
-
-const initSelectedMode: Mode = "transformation";
 
 interface ModeProviderType {
   children: ReactNode;
@@ -23,9 +28,25 @@ interface ModeContextType {
 
 const ModeContext = createContext<ModeContextType | null>(null);
 
+const getStoredMode = (): Mode => {
+  try {
+    const storedMode = localStorage.getItem("mode");
+
+    return isMode(storedMode) ? storedMode : "transformation";
+  } catch (err) {
+    throw new Error(`Error during recovery from stored mode: ${err}`);
+  }
+};
+
 const ModeProvider = ({ children }: ModeProviderType) => {
+  const savedMode = getStoredMode();
+
   const [trianglesTotalArea, setTrianglesTotalArea] = useState<number>(0);
-  const [selectedMode, setSelectedMode] = useState<Mode>(initSelectedMode);
+  const [selectedMode, setSelectedMode] = useState<Mode>(savedMode);
+
+  useEffect(() => {
+    localStorage.setItem("mode", selectedMode);
+  }, [selectedMode]);
 
   const modeConfig: ModeMap = {
     transformation: {
@@ -41,7 +62,9 @@ const ModeProvider = ({ children }: ModeProviderType) => {
     triangles: {
       title: "Área do Triângulo",
       component: <TriangleSummary trianglesTotalArea={trianglesTotalArea} />,
-      chart: <TrianglesChart changeTrianglesTotalArea={setTrianglesTotalArea} />,
+      chart: (
+        <TrianglesChart changeTrianglesTotalArea={setTrianglesTotalArea} />
+      ),
     },
   };
 
