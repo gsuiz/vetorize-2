@@ -20,7 +20,7 @@ export interface RegressionCoefficients {
 
 
 export type Mode = "transformation" | "triangles" | "regression";
-export type ModeTitle = "Transformações" | "Área do Triângulo" | "Regressão linear";
+export type ModeTitle = "Transformações" | "Área do Triângulo" | "Regressão";
 
 export type ModeMap = Record<
   Mode,

@@ -4,6 +4,7 @@ import { useState, ChangeEvent, SubmitEvent } from "react";
 import type { RegressionType } from "@/types";
 import { buildEquation } from "@/utils/regression";
 import { useRegressionContext } from "@/context/RegressionContext";
+import { isValidRegressionCoefficients } from "@/utils/validators";
 
 const inputClassName =
   "w-full font-normal h-10 px-3 text-center bg-background border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring";
@@ -13,6 +14,7 @@ export default function RegressionSettingsForm() {
     regressionCoefficients,
     chosenRegression,
     variableLabels,
+    setEstimationPoint,
     setVariableLabels,
     setChosenRegression,
   } = useRegressionContext();
@@ -22,9 +24,26 @@ export default function RegressionSettingsForm() {
     independent: variableLabels.independent,
   });
 
+  const [estimationInput, setEstimationInput] = useState<string>("");
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setForm((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleEstimationInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const targetValue = e.target.value.replace(",", ".");
+
+    const regex = /^-?(\d+(\.\d*)?)?$/;
+
+    if (regex.test(targetValue)) {
+      setEstimationInput(targetValue);
+
+      const estimationDraft = targetValue === "" ? null : Number(targetValue);
+      setEstimationPoint(
+        !Number.isNaN(estimationDraft) ? estimationDraft : null,
+      );
+    }
   };
 
   const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -69,6 +88,19 @@ export default function RegressionSettingsForm() {
         />
       </label>
 
+      <label className="flex gap-5 font-semibold items-center text-xs">
+        Ponto Estimado:
+        <input
+          type="text"
+          id="estimationPoint"
+          inputMode="decimal"
+          placeholder="0"
+          value={estimationInput}
+          className={inputClassName}
+          onChange={handleEstimationInputChange}
+        />
+      </label>
+
       <select
         id="axis"
         className={`${inputClassName} mb-5 cursor-pointer`}
@@ -80,14 +112,29 @@ export default function RegressionSettingsForm() {
         <option value="exponential">Regressão Exponencial</option>
       </select>
 
-      {regressionCoefficients ? (
+      {isValidRegressionCoefficients(regressionCoefficients) ? (
         <p className="font-mono text-sm text-muted-foreground">
           {buildEquation(
             chosenRegression,
             regressionCoefficients,
+            variableLabels.dependent || "f(x)",
+            variableLabels.independent || "x",
           )}
         </p>
-      ) : null}
+      ) : (
+        <div
+          role="alert"
+          className="flex items-start gap-2.5 p-3 text-xs rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-400"
+        >
+          <p className="leading-relaxed">
+            Não é possível calcular a{" "}
+            <span className="font-semibold">Regressão</span> com os pontos
+            atuais.
+            {chosenRegression === "exponential" &&
+              " Valores de y devem ser maiores que zero."}
+          </p>
+        </div>
+      )}
 
       <button className="h-10 px-4 bg-secondary text-secondary-foreground font-medium rounded-md hover:opacity-90 cursor-pointer">
         Aplicar

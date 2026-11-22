@@ -20,14 +20,16 @@ export const BASE_LAYOUT: Partial<Layout> = {
 
   xaxis: {
     gridcolor: "#222222",
-    zerolinecolor: "#444444",
+    zerolinewidth:3,
+    zerolinecolor: "#b2abab",
     tickfont: { color: "#a1a1aa" },
     tickformat: ".2~f",
     hoverformat: ".2~f",
   },
   yaxis: {
     gridcolor: "#222222",
-    zerolinecolor: "#444444",
+    zerolinewidth:3,
+    zerolinecolor: "#b2abab",
     tickfont: { color: "#a1a1aa" },
     tickformat: ".2~f",
     hoverformat: ".2~f",

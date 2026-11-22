@@ -143,8 +143,8 @@ export const formatTerms = (
 export const buildEquation = ( 
   regression: RegressionType,
   coefficients: RegressionCoefficients,
-  dependent: string = "f(x)",
-  independent: string = "x",
+  dependent: string = "x",
+  independent: string = "f(x)",
 ): string => {
   const { slope, intercept } = coefficients;
 

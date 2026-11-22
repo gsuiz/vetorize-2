@@ -29,8 +29,10 @@ interface RegressionContextType {
   regressionCoefficients: RegressionCoefficients | null;
   chosenRegression: RegressionType;
   variableLabels: RegressionVariableLabels;
-  setVariableLabels: (param: RegressionVariableLabels) => void;
-  setChosenRegression: (param: RegressionType) => void;
+  estimationPoint: number | null;
+  setEstimationPoint: (point: number | null) => void;
+  setVariableLabels: (variableLabels: RegressionVariableLabels) => void;
+  setChosenRegression: (type: RegressionType) => void;
 }
 
 const RegressionContext = createContext<RegressionContextType | null>(null);
@@ -51,6 +53,8 @@ export default function RegressionProvider({
   children,
 }: RegressionProviderType) {
   const { points } = usePoints();
+
+  const [estimationPoint, setEstimationPoint] = useState<number | null>(null);
 
   const [variableLabels, setVariableLabels] =
     useState<RegressionVariableLabels>({
@@ -86,6 +90,8 @@ export default function RegressionProvider({
         regressionCoefficients,
         chosenRegression,
         variableLabels,
+        estimationPoint,
+        setEstimationPoint,
         setVariableLabels,
         setChosenRegression,
       }}

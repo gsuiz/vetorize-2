@@ -19,8 +19,8 @@ export default function Page() {
         activeTitle={activeTitle}
       />
 
-      <main className="flex-1 p-8 w-full h-full bg-background flex items-center justify-center">
-        <div className="w-full h-full max-w-6xl max-h-[800px]">
+      <main className="flex-1 p-8 w-full h-full bg-background flex flex-col items-center justify-center">
+        <div className="w-full h-full max-w-8xl max-h-[1000px]">
           {activeChart}
         </div>
       </main>

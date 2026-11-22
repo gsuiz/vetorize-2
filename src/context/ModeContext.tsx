@@ -55,7 +55,7 @@ const ModeProvider = ({ children }: ModeProviderType) => {
       chart: <TransformationChart></TransformationChart>,
     },
     regression: {
-      title: "Regressão linear",
+      title: "Regressão",
       component: <RegressionSettingsForm></RegressionSettingsForm>,
       chart: <RegressionChart></RegressionChart>,
     },
