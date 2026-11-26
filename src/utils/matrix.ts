@@ -150,7 +150,7 @@ export const transpose = (m: number[][]): number[][] => {
  */
 
 export const generateNullArray = (length: number): (number | null)[] =>
-  [...Array(length)].map((_) => null);
+  [...Array(length)].map(() => null);
 
 /**
  *

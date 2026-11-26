@@ -2,12 +2,10 @@
 
 import { useMemo } from "react";
 import type { Data, Layout } from "plotly.js";
-import type { Vector } from "@/types";
 import { usePoints } from "@/context/PointsContext";
 import { useRegressionContext } from "@/context/RegressionContext";
-import { BASE_LAYOUT, BASE_CONFIG } from "@/config/plot";
+import { BASE_LAYOUT, BASE_CONFIG, calculateDataConfig } from "@/config/plot";
 import Plot from "@/components/Plot";
-import { calculateDataConfig } from "@/config/plot";
 import { getCoordinatesAndEndpoints } from "@/utils/matrix";
 import { calculateRegressionImage } from "@/utils/regression";
 import { isValidRegressionCoefficients } from "@/utils/validators";
@@ -22,59 +20,75 @@ export default function RegressionChart() {
   } = useRegressionContext();
 
   const data: Data[] = useMemo(() => {
-    const xCoord = points.map((point: Vector) => point[0]);
-
     const traces: Data[] = [calculateDataConfig(points)];
 
-    if (isValidRegressionCoefficients(regressionCoefficients) && points.length >= 2) {
-
-      const estimationResult = calculateRegressionImage(
-        chosenRegression,
-        regressionCoefficients,
-        estimationPoint,
-      );
-
-      const minX = Math.min(...xCoord);
-      const maxX = Math.max(...xCoord);
+    if (
+      isValidRegressionCoefficients(regressionCoefficients) &&
+      points.length >= 2
+    ) {
+      const { minX, maxX } = getCoordinatesAndEndpoints(points);
       const PADDING = 10;
-      const startX =
-        (estimationPoint < minX ? estimationPoint : minX) - PADDING;
-      const endX = (estimationPoint > maxX ? estimationPoint : maxX) + PADDING;
-      const STEP = 0.06;
-      const SAMPLES = (endX - startX) / STEP;
 
-      const lineX = Array.from(
-        { length: SAMPLES },
-        (_, i) => startX + STEP * i,
-      );
+      let startX = minX - PADDING;
+      let endX = maxX + PADDING;
+
+      if (estimationPoint !== null) {
+        if (estimationPoint < minX) {
+          startX = estimationPoint - PADDING;
+        }
+        if (estimationPoint > maxX) {
+          endX = estimationPoint + PADDING;
+        }
+      }
+
+      const STEP = 0.06;
+      const lineX: number[] = [];
+      const lineY: number[] = [];
+
+      for (let currentX = startX; currentX <= endX; currentX += STEP) {
+        lineX.push(currentX);
+        lineY.push(
+          calculateRegressionImage(
+            chosenRegression,
+            regressionCoefficients,
+            currentX,
+          ),
+        );
+      }
 
       traces.push({
         x: lineX,
-        y: lineX.map((x) =>
-          calculateRegressionImage(chosenRegression, regressionCoefficients, x),
-        ),
+        y: lineY,
         type: "scatter",
         mode: "lines",
         name: "Regressão",
         line: { color: "#3b82f6", width: 3 },
       });
 
-      traces.push({
-        x: [0, estimationPoint, estimationPoint],
-        y: [estimationResult, estimationResult, 0],
-        type: "scatter",
-        mode: "markers+lines",
-        name: "Estimativa",
-        marker: {
-          color: "#ffa600",
-          size: [0,13,0],
-        },
-        line: {
-          dash: "dash",
-          color: "#f8f017",
-          width: 1,
-        },
-      });
+      if (estimationPoint !== null) {
+        const estimationResult = calculateRegressionImage(
+          chosenRegression,
+          regressionCoefficients,
+          estimationPoint,
+        );
+
+        traces.push({
+          x: [0, estimationPoint, estimationPoint],
+          y: [estimationResult, estimationResult, 0],
+          type: "scatter",
+          mode: "markers+lines",
+          name: "Estimativa",
+          marker: {
+            color: "#ffa600",
+            size: [0, 13, 0],
+          },
+          line: {
+            dash: "dash",
+            color: "#f8f017",
+            width: 1,
+          },
+        });
+      }
     }
 
     return traces;
@@ -100,6 +114,27 @@ export default function RegressionChart() {
 
     const { maxX, minX, maxY, minY } = getCoordinatesAndEndpoints(points);
 
+    let viewMinX = minX;
+    let viewMaxX = maxX;
+    let viewMinY = minY;
+    let viewMaxY = maxY;
+
+    if (
+      estimationPoint !== null &&
+      isValidRegressionCoefficients(regressionCoefficients)
+    ) {
+      const estimationResult = calculateRegressionImage(
+        chosenRegression,
+        regressionCoefficients,
+        estimationPoint,
+      );
+
+      if (estimationPoint < viewMinX) viewMinX = estimationPoint;
+      if (estimationPoint > viewMaxX) viewMaxX = estimationPoint;
+      if (estimationResult < viewMinY) viewMinY = estimationResult;
+      if (estimationResult > viewMaxY) viewMaxY = estimationResult;
+    }
+
     const PADDING = 1.5;
 
     return {
@@ -108,15 +143,21 @@ export default function RegressionChart() {
       xaxis: {
         ...BASE_LAYOUT.xaxis,
         title: { text: variableLabels.independent || "x" },
-        range: [minX - PADDING, maxX + PADDING],
+        range: [viewMinX - PADDING, viewMaxX + PADDING],
       },
       yaxis: {
         ...BASE_LAYOUT.yaxis,
         title: { text: variableLabels.dependent || "y" },
-        range: [minY - PADDING, maxY + PADDING],
+        range: [viewMinY - PADDING, viewMaxY + PADDING],
       },
     };
-  }, [points, variableLabels]);
+  }, [
+    points,
+    variableLabels,
+    estimationPoint,
+    regressionCoefficients,
+    chosenRegression,
+  ]);
 
   return (
     <div className="flex flex-col items-start gap-3 h-full">
@@ -125,12 +166,13 @@ export default function RegressionChart() {
           <span className="w-3 h-3 rounded-full bg-red-500 border border-white/30" />
           Pontos de Ajuste
         </span>
-        {(estimationPoint && isValidRegressionCoefficients(regressionCoefficients)) && (
-          <span className="flex items-center gap-2 font-jetbrains">
-            <span className="w-3 h-3 rounded-full bg-yellow-400 border border-white/30" />
-            Estimativa
-          </span>
-        )}
+        {estimationPoint !== null &&
+          isValidRegressionCoefficients(regressionCoefficients) && (
+            <span className="flex items-center gap-2 font-jetbrains">
+              <span className="w-3 h-3 rounded-full bg-yellow-400 border border-white/30" />
+              Estimativa
+            </span>
+          )}
       </div>
       <Plot
         data={data}

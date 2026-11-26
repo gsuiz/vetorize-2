@@ -38,6 +38,10 @@ interface RegressionContextType {
 const RegressionContext = createContext<RegressionContextType | null>(null);
 
 const getStoredRegressionType = (): RegressionType => {
+  if (typeof window === "undefined") {
+    return "linear";
+  }
+
   try {
     const storedRegressionType = localStorage.getItem("regressionType");
 

@@ -55,6 +55,7 @@ export default function PointInputForm() {
           <input
             id="x"
             type="number"
+            step="any"
             value={coordinateInputs.x}
             onChange={handleChange}
             placeholder="0"
@@ -74,6 +75,7 @@ export default function PointInputForm() {
           <input
             id="y"
             type="number"
+            step="any"
             value={coordinateInputs.y}
             onChange={handleChange}
             placeholder="0"
@@ -87,7 +89,7 @@ export default function PointInputForm() {
           </label>
           <button
             disabled={coordinateInputs.x === "" || coordinateInputs.y === ""}
-            className="h-10 px-4 bg-secundary hover:opacity-90 text-secundary-foreground font-medium rounded-md transition-all shadow-sm whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-10 px-4 bg-secondary hover:opacity-90 text-secondary-foreground font-medium rounded-md transition-all shadow-sm whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Adicionar Ponto
           </button>

@@ -2,9 +2,9 @@
 
 import { createContext, ReactNode, useState, useContext, useEffect } from "react";
 import { useModeContext } from "./ModeContext";
-import type { Matrix, Vector } from "../types";
+import type { Matrix, Mode, Vector } from "../types";
 import { isMatrix } from "@/utils/validators";
-import { sumPoints } from "../utils/matrix";
+import { sortPointsByCentroidAngle } from "@/utils/triangles";
 
 interface PointsProviderProps {
   children: ReactNode;
@@ -27,8 +27,12 @@ interface PointsContextType {
 const PointsContext = createContext<PointsContextType | null>(null);
 
 const getStoredPoints = (): Matrix => {
-  try{
-    const storedPoints = localStorage.getItem("points")
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const storedPoints = localStorage.getItem("points");
 
     if(!storedPoints){
       return []
@@ -42,33 +46,28 @@ const getStoredPoints = (): Matrix => {
   }
 }
 
-const includesPoint = (currentPoints: Matrix, newPoint: Vector): boolean => {
-  return currentPoints.some((p) => {
-    return p[0] === newPoint[0] && p[1] === newPoint[1];
-  });
-};
+const includesPoint = (
+  currentPoints: Matrix,
+  newPoint: Vector,
+  mode: Mode,
+): boolean => {
+  let startIndex = 0;
 
-const sortPointsByCentroidAngle = (newPoints: Matrix): Matrix => {
-  const xCoord: number[] = newPoints.map((item) => item[0]);
-  const yCoord: number[] = newPoints.map((item) => item[1]);
+  if (mode === "triangles") {
+    const pointsInCurrentTriangle = currentPoints.length % 3;
+    startIndex = currentPoints.length - pointsInCurrentTriangle;
+  }
 
-  const length = newPoints.length;
+  for (let i = startIndex; i < currentPoints.length; i++) {
+    if (
+      currentPoints[i][0] === newPoint[0] &&
+      currentPoints[i][1] === newPoint[1]
+    ) {
+      return true;
+    }
+  }
 
-  const centerX = sumPoints(xCoord) / length;
-  const centerY = sumPoints(yCoord) / length;
-
-  const pointsWithAngle = newPoints.map((item) => {
-    const deltaX: number = item[0] - centerX;
-    const deltaY: number = item[1] - centerY;
-
-    const angle = Math.atan2(deltaY, deltaX);
-
-    return { point: item, angle };
-  });
-
-  const orderedByAngle = pointsWithAngle.sort((a, b) => a.angle - b.angle);
-
-  return orderedByAngle.map((item) => item.point);
+  return false;
 };
 
 export function usePoints() {
@@ -94,7 +93,7 @@ export default function PointsProvider({ children }: PointsProviderProps) {
   }, [points])
 
   const addPoint = (newPoint: Vector, setErr: (param: string) => void) => {
-    if (!includesPoint(points, newPoint)) {
+    if (!includesPoint(points, newPoint, mode)) {
       let newPoints: Matrix = [...points, newPoint];
 
       if (newPoints.length >= 3 && mode === "transformation") {

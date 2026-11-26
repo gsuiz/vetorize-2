@@ -51,6 +51,9 @@ export const calculateExpoRegression = (
   let sumXLogY = 0;
 
   for (const [x, y] of points) {
+    if (y <= 0) {
+      return null;
+    }
     sumX += x;
     sumLogY += Math.log(y);
     sumXX += x * x;
@@ -140,11 +143,11 @@ export const formatTerms = (
   return rendered.length > 0 ? rendered.join(" ") : "0";
 };
 
-export const buildEquation = ( 
+export const buildEquation = (
   regression: RegressionType,
   coefficients: RegressionCoefficients,
-  dependent: string = "x",
-  independent: string = "f(x)",
+  dependent: string = "f(x)",
+  independent: string = "x",
 ): string => {
   const { slope, intercept } = coefficients;
 

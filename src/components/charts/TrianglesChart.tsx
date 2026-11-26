@@ -1,14 +1,14 @@
 import { useMemo, useEffect } from "react";
 import type { FigureState, Matrix, Vector } from "@/types";
 import { usePoints } from "../../context/PointsContext";
-import type { Annotation } from "plotly.js";
+import type { Annotation, Data } from "plotly.js";
 import Plot from "@/components/Plot";
 import {
   calculateAnchorPoint,
-  generateNullArray,
   getCoordinatesAndEndpoints,
   calculateTriangleArea,
 } from "@/utils/matrix";
+import { buildNonIntersectingTriangles } from "@/utils/triangles";
 
 import { BASE_CONFIG, BASE_LAYOUT, calculateDataConfig } from "@/config/plot";
 
@@ -16,84 +16,31 @@ interface TrianglesChartProps {
   changeTrianglesTotalArea: (newArea: number) => void;
 }
 
-function addNullsInPoints(xCoord: number[], yCoord: number[]) {
-  const arrLength: number = xCoord.length;
-
-  const nNULLs: number = Math.floor(arrLength / 3);
-
-  let nullsAdded: number = 0;
-
-  const newXCoord: (number | null)[] = generateNullArray(nNULLs + arrLength);
-  const newYCoord: (number | null)[] = generateNullArray(nNULLs + arrLength);
-
-  xCoord.forEach((_, index) => {
-    if (index > 0 && index % 3 === 0) nullsAdded++;
-
-    newXCoord[index + nullsAdded] = xCoord[index];
-    newYCoord[index + nullsAdded] = yCoord[index];
-  });
-
-  return [newXCoord, newYCoord];
-}
-
-function getTrianglesInSeparations(
-  pointsWithSep: (number | null)[],
-): number[][] {
-  let baseIndex: number = 0;
-
-  const trianglesCoordSegments = pointsWithSep.reduce(
-    (acc: number[][], item: number | null, index: number) => {
-      if (item === null) {
-        acc.push(pointsWithSep.slice(baseIndex, index) as number[]);
-        baseIndex = index + 1;
-      }
-
-      return acc;
-    },
-    [],
-  );
-
-  return trianglesCoordSegments;
-}
-
 const TrianglesChart = ({ changeTrianglesTotalArea }: TrianglesChartProps) => {
   const { points } = usePoints();
 
   const { figure, totalArea } = useMemo(() => {
-    const { xCoord, yCoord, maxX, minX, maxY, minY } =
-      getCoordinatesAndEndpoints(points);
+    const { maxX, minX, maxY, minY } = getCoordinatesAndEndpoints(points);
 
     const PADDING: number = 1.5;
 
-    const [xCoordWithSeparation, yCoordWithSeparation] = addNullsInPoints(
-      xCoord,
-      yCoord,
-    );
-
-    const xCoordSegmentsTriangles =
-      getTrianglesInSeparations(xCoordWithSeparation);
-    const yCoordSegmentsTriangles =
-      getTrianglesInSeparations(yCoordWithSeparation);
-
-    const trianglesPoints: Matrix[] = xCoordSegmentsTriangles.map(
-      (segPoints: number[], segIndex) =>
-        segPoints.map((point: number, pointIndex) => [
-          point,
-          yCoordSegmentsTriangles[segIndex][pointIndex],
-        ]),
-    );
+    const trianglesPoints: Matrix[] = buildNonIntersectingTriangles(points);
 
     const annotations: Annotation[] = [];
+    const traces: Data[] = [];
     let totalArea: number = 0;
 
-    trianglesPoints.forEach((triangle: Matrix) => {
+    for (let i = 0; i < trianglesPoints.length; i++) {
+      const triangle: Matrix = trianglesPoints[i];
       const triangleArea: number = calculateTriangleArea(triangle);
       const anchorPoint: Vector = calculateAnchorPoint(triangle);
 
       totalArea += triangleArea;
 
+      const formattedArea = Number(triangleArea.toFixed(2));
+
       const triangleAnnotation: Annotation = {
-        text: `<b>${triangleArea}</b>`,
+        text: `<b>${formattedArea}</b>`,
         font: {
           family: "JetBrains Mono",
           color: "#ffffff",
@@ -107,19 +54,57 @@ const TrianglesChart = ({ changeTrianglesTotalArea }: TrianglesChartProps) => {
       };
 
       annotations.push(triangleAnnotation);
-    });
+
+      const closedTrianglePoints: Matrix = [
+        triangle[0],
+        triangle[1],
+        triangle[2],
+        triangle[0],
+      ];
+
+      const triangleTrace: Data = {
+        ...calculateDataConfig(closedTrianglePoints),
+        mode: "lines+markers",
+        fill: "toself",
+        name: `Triângulo ${i + 1}`,
+        showlegend: false,
+      };
+
+      traces.push(triangleTrace);
+    }
+
+    const remainingCount = points.length % 3;
+
+    if (remainingCount > 0) {
+      const remainingPoints: Matrix = [];
+      const startIndex = points.length - remainingCount;
+
+      for (let i = startIndex; i < points.length; i++) {
+        remainingPoints.push(points[i]);
+      }
+
+      const remainingTrace: Data = {
+        ...calculateDataConfig(remainingPoints),
+        mode: "markers",
+        name: "Pontos pendentes",
+        showlegend: false,
+      };
+
+      traces.push(remainingTrace);
+    }
+
+    if (traces.length === 0) {
+      traces.push({
+        ...calculateDataConfig([]),
+        showlegend: false,
+      });
+    }
 
     const figure: FigureState = {
-      data: [
-        {
-          ...calculateDataConfig(points),
-          fill: "toself",
-          x: xCoordWithSeparation,
-          y: yCoordWithSeparation,
-        },
-      ],
+      data: traces,
       layout: {
         ...BASE_LAYOUT,
+        showlegend: false,
         annotations,
         xaxis: {
           ...BASE_LAYOUT.xaxis,

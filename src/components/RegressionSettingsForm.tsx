@@ -2,7 +2,7 @@
 
 import { useState, ChangeEvent, SubmitEvent } from "react";
 import type { RegressionType } from "@/types";
-import { buildEquation } from "@/utils/regression";
+import { buildEquation, calculateRegressionImage } from "@/utils/regression";
 import { useRegressionContext } from "@/context/RegressionContext";
 import { isValidRegressionCoefficients } from "@/utils/validators";
 
@@ -14,6 +14,7 @@ export default function RegressionSettingsForm() {
     regressionCoefficients,
     chosenRegression,
     variableLabels,
+    estimationPoint,
     setEstimationPoint,
     setVariableLabels,
     setChosenRegression,
@@ -113,14 +114,27 @@ export default function RegressionSettingsForm() {
       </select>
 
       {isValidRegressionCoefficients(regressionCoefficients) ? (
-        <p className="font-mono text-sm text-muted-foreground">
-          {buildEquation(
-            chosenRegression,
-            regressionCoefficients,
-            variableLabels.dependent || "f(x)",
-            variableLabels.independent || "x",
+        <div className="flex flex-col gap-1.5">
+          <p className="font-mono text-sm text-muted-foreground">
+            {buildEquation(
+              chosenRegression,
+              regressionCoefficients,
+              variableLabels.dependent || "f(x)",
+              variableLabels.independent || "x",
+            )}
+          </p>
+          {estimationPoint !== null && (
+            <p className="font-mono text-sm text-amber-400">
+              {`Estimativa (${variableLabels.independent || "x"} = ${estimationPoint}): ${Number(
+                calculateRegressionImage(
+                  chosenRegression,
+                  regressionCoefficients,
+                  estimationPoint,
+                ).toFixed(2),
+              )}`}
+            </p>
           )}
-        </p>
+        </div>
       ) : (
         <div
           role="alert"

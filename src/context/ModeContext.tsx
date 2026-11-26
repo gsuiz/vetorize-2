@@ -29,6 +29,10 @@ interface ModeContextType {
 const ModeContext = createContext<ModeContextType | null>(null);
 
 const getStoredMode = (): Mode => {
+  if (typeof window === "undefined") {
+    return "transformation";
+  }
+
   try {
     const storedMode = localStorage.getItem("mode");
 

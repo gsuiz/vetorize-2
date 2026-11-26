@@ -88,6 +88,7 @@ export default function TransformationForm() {
         <input
           id="angle"
           type="number"
+          step="any"
           value={form.angle}
           onChange={handleChange}
           placeholder="Ângulo (graus)"
@@ -159,14 +160,18 @@ export default function TransformationForm() {
         <div className="flex gap-2">
           <input
             type="number"
+            step="any"
             id="anchorX"
+            value={form.anchorX}
             placeholder="x"
             className={inputClassName}
             onChange={handleChange}
           />
           <input
             type="number"
+            step="any"
             id="anchorY"
+            value={form.anchorY}
             placeholder="y"
             className={inputClassName}
             onChange={handleChange}
